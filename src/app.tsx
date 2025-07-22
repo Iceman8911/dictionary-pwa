@@ -8,7 +8,9 @@ export default function App() {
 		<Router
 			root={(props) => (
 				<>
-					<Suspense>{props.children}</Suspense>
+					<main class="h-[100vh] w-[100vw]">
+						<Suspense>{props.children}</Suspense>
+					</main>
 				</>
 			)}
 		>
