@@ -5,13 +5,14 @@
 		"dev": "vinxi dev",
 		"build": "vinxi build",
 		"start": "vinxi start",
-		"bun-dev": "bun --bun vinxi dev",
+		"bun-dev": "bun --bun vinxi dev --port=3001",
 		"bun-build": "bun --bun vinxi build",
-		"bun-start": "bun --bun vinxi start"
+		"bun-start": "bun --bun vinxi start --port=3001"
 	},
 	"dependencies": {
 		"@solidjs/router": "^0.15.0",
 		"@solidjs/start": "^1.1.0",
+		"lucide-solid": "^0.525.0",
 		"solid-js": "^1.9.5",
 		"valibot": "^1.1.0",
 		"vinxi": "^0.5.7"
