@@ -1,13 +1,21 @@
 import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
 import { createSignal, For, type JSX, Suspense } from "solid-js";
-import { getSearchSuggestions } from "~/dictionaries/datamuse";
+import { createStore, type SetStoreFunction } from "solid-js/store";
+import {
+	getSearchSuggestions,
+	searchForWordDefinitionAndSynonyms,
+	type WordSearchResponseOutput,
+} from "~/dictionaries/datamuse";
 import { generateUUID } from "~/utils/other";
 
 export default function Home() {
+	const [searchResults, setSearchResults] =
+		createStore<WordSearchResponseOutput>([]);
+
 	return (
 		<div class="grid grid-cols-2 grid-rows-[3rem_3rem_1fr] md:grid-rows-[3rem_1fr] gap-4 h-[75%] px-4">
-			<SearchBar />
+			<SearchBar searchResultSetter={setSearchResults} />
 
 			<SearchResults />
 
@@ -16,7 +24,9 @@ export default function Home() {
 	);
 }
 
-function SearchBar() {
+function SearchBar(prop: {
+	searchResultSetter: SetStoreFunction<WordSearchResponseOutput>;
+}) {
 	const DATALIST_ID = generateUUID();
 
 	const [searchInput, setSearchInput] = createSignal("");
@@ -35,6 +45,13 @@ function SearchBar() {
 				type="search"
 				placeholder="Search for anything..."
 				onInput={({ target: { value } }) => setSearchInput(value)}
+				onKeyUp={async ({ key }) => {
+					if (key === "Enter") {
+						console.log(
+							await searchForWordDefinitionAndSynonyms({ word: searchInput() }),
+						);
+					}
+				}}
 				list={DATALIST_ID}
 			/>
 
