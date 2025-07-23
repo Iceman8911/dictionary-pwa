@@ -1,5 +1,8 @@
+import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
-import { For, type JSX } from "solid-js";
+import { createSignal, For, type JSX, Suspense } from "solid-js";
+import { getSearchSuggestions } from "~/dictionaries/datamuse";
+import { generateUUID } from "~/utils/other";
 
 export default function Home() {
 	return (
@@ -14,11 +17,34 @@ export default function Home() {
 }
 
 function SearchBar() {
+	const DATALIST_ID = generateUUID();
+
+	const [searchInput, setSearchInput] = createSignal("");
+
+	const suggestions = createAsync(() => {
+		if (searchInput()) return getSearchSuggestions({ hint: searchInput() });
+
+		return Promise.resolve([]);
+	});
+
 	return (
 		<label class="input input-primary col-span-2 justify-self-center self-center w-4/5 md:w-3/5">
 			<SearchIcon class="h-[75%] w-auto text-primary" strokeWidth={1} />
 
-			<input type="search" placeholder="Search" />
+			<input
+				type="search"
+				placeholder="Search for anything..."
+				onInput={({ target: { value } }) => setSearchInput(value)}
+				list={DATALIST_ID}
+			/>
+
+			<datalist id={DATALIST_ID}>
+				<Suspense>
+					<For each={suggestions.latest}>
+						{({ word }) => <option value={word}></option>}
+					</For>
+				</Suspense>
+			</datalist>
 		</label>
 	);
 }
