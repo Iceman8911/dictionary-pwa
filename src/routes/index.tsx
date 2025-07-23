@@ -5,19 +5,22 @@ import { createStore, type SetStoreFunction } from "solid-js/store";
 import {
 	getSearchSuggestions,
 	searchForWordDefinitionAndSynonyms,
-	type WordSearchResponseOutput,
 } from "~/dictionaries/datamuse";
+import type { DictionaryWordResult } from "~/types/dictionary";
 import { generateUUID } from "~/utils/other";
 
+type NullableDictionaryWordResult = DictionaryWordResult | null;
+
 export default function Home() {
-	const [searchResults, setSearchResults] =
-		createStore<WordSearchResponseOutput>([]);
+	const [searchResult, setSearchResult] =
+		//@ts-expect-error
+		createStore<NullableDictionaryWordResult>(null);
 
 	return (
 		<div class="grid grid-cols-2 grid-rows-[3rem_3rem_1fr] md:grid-rows-[3rem_1fr] gap-4 h-[75%] px-4">
-			<SearchBar searchResultSetter={setSearchResults} />
+			<SearchBar searchResultSetter={setSearchResult} />
 
-			<SearchResults />
+			<SearchResults searchResult={searchResult} />
 
 			<SearchedWordInfo />
 		</div>
@@ -25,7 +28,7 @@ export default function Home() {
 }
 
 function SearchBar(prop: {
-	searchResultSetter: SetStoreFunction<WordSearchResponseOutput>;
+	searchResultSetter: SetStoreFunction<NullableDictionaryWordResult>;
 }) {
 	const DATALIST_ID = generateUUID();
 
@@ -37,6 +40,14 @@ function SearchBar(prop: {
 		return Promise.resolve([]);
 	});
 
+	const search = async () => {
+		prop.searchResultSetter(
+			await searchForWordDefinitionAndSynonyms({
+				word: searchInput(),
+			}),
+		);
+	};
+
 	return (
 		<label class="input input-primary col-span-2 justify-self-center self-center w-4/5 md:w-3/5">
 			<SearchIcon class="h-[75%] w-auto text-primary" strokeWidth={1} />
@@ -47,15 +58,14 @@ function SearchBar(prop: {
 				onInput={({ target: { value } }) => {
 					if (value.length > 2) {
 						setSearchInput(value);
+					} else {
+						setSearchInput("");
 					}
 				}}
 				onKeyUp={async ({ key }) => {
-					if (key === "Enter") {
-						console.log(
-							await searchForWordDefinitionAndSynonyms({ word: searchInput() }),
-						);
-					}
+					if (key === "Enter") search();
 				}}
+				onChange={search}
 				list={DATALIST_ID}
 			/>
 
@@ -71,14 +81,19 @@ function SearchBar(prop: {
 }
 
 /** A list including the currently searched word and related ones */
-function SearchResults() {
+function SearchResults(prop: { searchResult: NullableDictionaryWordResult }) {
+	const searchResultList = () =>
+		prop.searchResult && Object.keys(prop.searchResult ?? []).length
+			? [prop.searchResult.name, prop.searchResult.related.synonyms].flat()
+			: [];
+
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1 md:p-4">
 			<ul class="menu menu-horizontal md:menu-vertical size-full md:text-lg flex-nowrap overflow-x-auto">
-				<For each={Array(35)}>
-					{(val) => (
+				<For each={searchResultList()}>
+					{(word) => (
 						<li>
-							<button type="button">Search Results</button>
+							<button type="button">{word}</button>
 						</li>
 					)}
 				</For>
