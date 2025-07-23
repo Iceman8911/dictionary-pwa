@@ -44,7 +44,11 @@ function SearchBar(prop: {
 			<input
 				type="search"
 				placeholder="Search for anything..."
-				onInput={({ target: { value } }) => setSearchInput(value)}
+				onInput={({ target: { value } }) => {
+					if (value.length > 2) {
+						setSearchInput(value);
+					}
+				}}
 				onKeyUp={async ({ key }) => {
 					if (key === "Enter") {
 						console.log(
