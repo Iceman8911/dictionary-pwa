@@ -107,10 +107,113 @@ function SearchResults(prop: { searchResult: NullableDictionaryWordResult }) {
 }
 
 /** Relevant data about the currently searched word */
-function SearchedWordInfo() {
+function SearchedWordInfo(prop: {
+	searchResult: NullableDictionaryWordResult;
+}) {
+	function Definitions(prop: {
+		definitions: DictionaryWordResult["definitions"];
+	}) {
+		return (
+			<div>
+				<Show when={!!prop.definitions.length && prop.definitions}>
+					{(definitions) => (
+						<>
+							<span>Definitions:</span>
+
+							<ul class="mt-1">
+								<For each={definitions()}>
+									{({ definition, partOfSpeech }, index) => (
+										<li>
+											<span>{index()}.</span>{" "}
+											<span> {`(${partOfSpeech})`}</span> {definition}
+										</li>
+									)}
+								</For>
+							</ul>
+						</>
+					)}
+				</Show>
+			</div>
+		);
+	}
+
+	function Examples(prop: { examples: DictionaryWordResult["examples"] }) {
+		return (
+			<div>
+				<Show when={!!prop.examples.length && prop.examples}>
+					{(examples) => (
+						<>
+							<span>Examples:</span>
+
+							<ul class="mt-1">
+								<For each={examples()}>
+									{({ example, partOfSpeech }, index) => (
+										<li>
+											<span>{index()}.</span>{" "}
+											<span> {`(${partOfSpeech})`}</span> {example}
+										</li>
+									)}
+								</For>
+							</ul>
+						</>
+					)}
+				</Show>
+			</div>
+		);
+	}
+
+	function Frequency(prop: { freq: DictionaryWordResult["frequency"] }) {
+		return (
+			<Show when={prop.freq}>
+				{(freq) => (
+					<div>
+						<span>Frequency In Daily Use:</span> {freq()}
+					</div>
+				)}
+			</Show>
+		);
+	}
+
+	function Audio(prop: { url: DictionaryWordResult["audioUrl"] }) {
+		return (
+			<Show when={prop.url}>
+				{(audioUrl) => (
+					<div>
+						<span>Audio Url:</span>{" "}
+						<a href={audioUrl().toString()}>{audioUrl().toString()}</a>
+					</div>
+				)}
+			</Show>
+		);
+	}
+
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1">
-			Word Info
+			<Show when={prop.searchResult}>
+				{(val) => (
+					<div class="size-full overflow-y-auto flex flex-col gap-3 p-4 [&_span]:font-semibold">
+						<div>
+							<span>Name:</span> {val().name}
+						</div>
+
+						<div>
+							<span>Part Of Speech:</span> {val().partOfSpeech.join(", ")}
+						</div>
+
+						<div>
+							<span>IPA Phonetics:</span> {val().phonetics}
+						</div>
+
+						<Audio url={val().audioUrl} />
+
+						<Definitions definitions={val().definitions} />
+
+						<Examples examples={val().examples} />
+
+						<Frequency freq={val().frequency} />
+					</div>
+				)}
+			</Show>
 		</SharedContainer>
 	);
 }
