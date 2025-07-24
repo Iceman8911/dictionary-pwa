@@ -9,6 +9,12 @@ type QUERY_NAME = (typeof QUERY_NAME)[keyof typeof QUERY_NAME];
 const DICTIONARY_API = {
 	/** https://www.datamuse.com/api */
 	DATAMUSE: "datamuse",
+
+	/** https://dictionaryapi.dev */
+	DICTIONARY_API: "dictApi",
+
+	/** https://freedictionaryapi.com */
+	FREE_DICTIONARY: "freeDictApi",
 } as const;
 
 type DICTIONARY_API = (typeof DICTIONARY_API)[keyof typeof DICTIONARY_API];
