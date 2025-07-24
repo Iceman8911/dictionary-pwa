@@ -1,7 +1,16 @@
 /** For keeping track of queries */
-export const QUERY_NAME = {
+const QUERY_NAME = {
 	IS_CONNECTED: "isConnected",
 	SEARCH_SUGGESTIONS: "searchSuggestions",
-};
+} as const;
 
-export type QUERY_NAME = (typeof QUERY_NAME)[keyof typeof QUERY_NAME];
+type QUERY_NAME = (typeof QUERY_NAME)[keyof typeof QUERY_NAME];
+
+const DICTIONARY_API = {
+	/** https://www.datamuse.com/api */
+	DATAMUSE: "datamuse",
+} as const;
+
+type DICTIONARY_API = (typeof DICTIONARY_API)[keyof typeof DICTIONARY_API];
+
+export { QUERY_NAME, DICTIONARY_API };

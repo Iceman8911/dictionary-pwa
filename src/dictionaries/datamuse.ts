@@ -1,6 +1,6 @@
 import { query } from "@solidjs/router";
 import * as v from "valibot";
-import { QUERY_NAME } from "~/shared/enums";
+import { DICTIONARY_API, QUERY_NAME } from "~/shared/enums";
 import { ABORT_EARLY_CONFIG } from "~/shared/valibot";
 import type { DictionaryWordResult, PartOfSpeech } from "~/types/dictionary";
 import { gIsUserConnectedToInternet } from "~/utils/internet";
@@ -308,7 +308,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 			examples: [],
 			frequency,
 			name: mainWordsResponse.word,
-			originApi: "datamuse",
+			originApi: DICTIONARY_API.DATAMUSE,
 			partOfSpeech,
 			phonetics,
 			related: { antonyms: [], synonyms: [] },

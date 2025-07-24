@@ -1,3 +1,5 @@
+import type { DICTIONARY_API } from "~/shared/enums";
+
 /** Main structure of parsed and stored data for each word */
 type DictionaryWordResult = Readonly<{
 	name: string;
@@ -8,7 +10,7 @@ type DictionaryWordResult = Readonly<{
 	partOfSpeech: PartOfSpeech[];
 
 	/** The API that this data was generated from */
-	originApi: "datamuse";
+	originApi: DICTIONARY_API;
 
 	definitions: { partOfSpeech: PartOfSpeech; definition: string }[];
 
