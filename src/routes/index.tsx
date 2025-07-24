@@ -2,10 +2,8 @@ import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
 import { createSignal, For, type JSX, Suspense } from "solid-js";
 import { createStore, type SetStoreFunction } from "solid-js/store";
-import {
-	getSearchSuggestions,
-	searchForWordDefinitionAndSynonyms,
-} from "~/dictionaries/datamuse";
+import { getSearchSuggestions } from "~/dictionaries/datamuse";
+import { fetchDictionaryResult } from "~/dictionaries/dictionary";
 import type { DictionaryWordResult } from "~/types/dictionary";
 import { generateUUID } from "~/utils/other";
 
@@ -42,7 +40,7 @@ function SearchBar(prop: {
 
 	const search = async () => {
 		prop.searchResultSetter(
-			await searchForWordDefinitionAndSynonyms({
+			await fetchDictionaryResult({
 				word: searchInput(),
 			}),
 		);
