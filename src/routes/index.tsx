@@ -1,7 +1,14 @@
 import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
-import { createSignal, For, type JSX, Suspense } from "solid-js";
-import { createStore, type SetStoreFunction } from "solid-js/store";
+import {
+	createSignal,
+	For,
+	type JSX,
+	type Setter,
+	Show,
+	Suspense,
+} from "solid-js";
+import type { SetStoreFunction } from "solid-js/store";
 import { getSearchSuggestions } from "~/dictionaries/datamuse";
 import { fetchDictionaryResult } from "~/dictionaries/dictionary";
 import type { DictionaryWordResult } from "~/types/dictionary";
@@ -11,22 +18,21 @@ type NullableDictionaryWordResult = DictionaryWordResult | null;
 
 export default function Home() {
 	const [searchResult, setSearchResult] =
-		//@ts-expect-error
-		createStore<NullableDictionaryWordResult>(null);
+		createSignal<NullableDictionaryWordResult>(null);
 
 	return (
 		<div class="grid grid-cols-2 grid-rows-[3rem_3rem_1fr] md:grid-rows-[3rem_1fr] gap-4 h-[75%] px-4">
 			<SearchBar searchResultSetter={setSearchResult} />
 
-			<SearchResults searchResult={searchResult} />
+			<SearchResults searchResult={searchResult()} />
 
-			<SearchedWordInfo />
+			<SearchedWordInfo searchResult={searchResult()} />
 		</div>
 	);
 }
 
 function SearchBar(prop: {
-	searchResultSetter: SetStoreFunction<NullableDictionaryWordResult>;
+	searchResultSetter: Setter<NullableDictionaryWordResult>;
 }) {
 	const DATALIST_ID = generateUUID();
 
@@ -81,7 +87,7 @@ function SearchBar(prop: {
 /** A list including the currently searched word and related ones */
 function SearchResults(prop: { searchResult: NullableDictionaryWordResult }) {
 	const searchResultList = () =>
-		prop.searchResult && Object.keys(prop.searchResult ?? []).length
+		prop.searchResult
 			? [prop.searchResult.name, prop.searchResult.related.synonyms].flat()
 			: [];
 
