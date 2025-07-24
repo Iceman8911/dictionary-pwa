@@ -38,16 +38,19 @@ type SuggestionPayloadInput = v.InferInput<typeof SuggestionPayloadSchema>;
 
 const SuggestionResponseSchema = v.pipe(
 	v.array(
-		v.object({
-			/** A suggested word */
-			word: v.pipe(v.string(), v.readonly()),
+		v.pipe(
+			v.object({
+				/** A suggested word */
+				word: v.string(),
 
-			/** Ranking of this word compared to others in the array.
-			 *
-			 * Higher is better
-			 */
-			score: v.pipe(v.number(), v.readonly()),
-		}),
+				/** Ranking of this word compared to others in the array.
+				 *
+				 * Higher is better
+				 */
+				score: v.number(),
+			}),
+			v.readonly(),
+		),
 	),
 	v.readonly(),
 );
