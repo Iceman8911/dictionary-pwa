@@ -11,8 +11,8 @@ const WORDS_ENDPOINT = `${BASE_URL}/words`;
 
 const SUGGESTION_ENDPOINT = `${BASE_URL}/sug`;
 
-const SuggestionPayloadSchema = v.object({
-	hint: v.pipe(
+const GenericPayloadSchema = v.object({
+	word: v.pipe(
 		v.string(),
 		v.transform((str) => str.replaceAll(" ", "+").replaceAll("-", "+")),
 	),
@@ -29,6 +29,8 @@ const SuggestionPayloadSchema = v.object({
 		10,
 	),
 });
+
+const SuggestionPayloadSchema = GenericPayloadSchema;
 
 type SuggestionPayloadInput = v.InferInput<typeof SuggestionPayloadSchema>;
 
@@ -55,7 +57,7 @@ const getSearchSuggestions = query(
 		payload: SuggestionPayloadInput,
 	): Promise<SuggestionResponseOutput> => {
 		if (await gIsUserConnectedToInternet()) {
-			const { hint, maxResults } = v.parse(
+			const { word: hint, maxResults } = v.parse(
 				SuggestionPayloadSchema,
 				payload,
 				ABORT_EARLY_CONFIG,
@@ -79,24 +81,7 @@ const getSearchSuggestions = query(
 	QUERY_NAME.SEARCH_SUGGESTIONS,
 );
 
-const WordSearchPayloadSchema = v.object({
-	word: v.pipe(
-		v.string(),
-		v.transform((str) => str.replaceAll(" ", "+").replaceAll("-", "+")),
-	),
-
-	/** Max value of 1000
-	 *
-	 * Default of 10
-	 */
-	maxResults: v.optional(
-		v.pipe(
-			v.number(),
-			v.transform((num) => num % 1001),
-		),
-		10,
-	),
-});
+const WordSearchPayloadSchema = GenericPayloadSchema;
 
 type WordSearchPayloadInput = v.InferInput<typeof WordSearchPayloadSchema>;
 

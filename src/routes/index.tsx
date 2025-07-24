@@ -35,7 +35,7 @@ function SearchBar(prop: {
 	const [searchInput, setSearchInput] = createSignal("");
 
 	const suggestions = createAsync(() => {
-		if (searchInput()) return getSearchSuggestions({ hint: searchInput() });
+		if (searchInput()) return getSearchSuggestions({ word: searchInput() });
 
 		return Promise.resolve([]);
 	});
