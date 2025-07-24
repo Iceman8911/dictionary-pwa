@@ -14,7 +14,9 @@ const SUGGESTION_ENDPOINT = `${BASE_URL}/sug`;
 const GenericPayloadSchema = v.object({
 	word: v.pipe(
 		v.string(),
-		v.transform((str) => str.replaceAll(" ", "+").replaceAll("-", "+")),
+		v.transform((str) =>
+			str.replaceAll(" ", "+").replaceAll("-", "+").toLowerCase(),
+		),
 	),
 
 	/** Max value of 1000
