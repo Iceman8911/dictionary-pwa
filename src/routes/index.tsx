@@ -1,7 +1,7 @@
 import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
 import { createSignal, For, type JSX, Show, Suspense } from "solid-js";
-import LoadingSpinner from "~/components/loading-spinner";
+import Placeholder from "~/components/placeholder";
 import { getSearchSuggestions } from "~/dictionaries/datamuse";
 import { fetchDictionaryResult } from "~/dictionaries/dictionary";
 import type { DictionaryWordResult } from "~/types/dictionary";
@@ -68,8 +68,8 @@ function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
 			/>
 
 			<datalist id={DATALIST_ID}>
-				<Suspense fallback={<LoadingSpinner />}>
-					<For each={suggestions.latest}>
+				<Suspense fallback={<Placeholder />}>
+					<For each={suggestions.latest} fallback={<Placeholder />}>
 						{({ word }) => <option value={word}></option>}
 					</For>
 				</Suspense>
@@ -91,7 +91,7 @@ function SearchResults(prop: {
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1 md:p-4">
 			<ul class="menu menu-horizontal md:menu-vertical size-full md:text-lg flex-nowrap overflow-x-auto">
-				<For each={searchResultList()}>
+				<For each={searchResultList()} fallback={<Placeholder />}>
 					{(word) => (
 						<li>
 							<button type="button" onClick={(_) => prop.searchFunction(word)}>
@@ -188,7 +188,7 @@ function SearchedWordInfo(prop: {
 
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1">
-			<Show when={prop.searchResult}>
+			<Show when={prop.searchResult} fallback={<Placeholder />}>
 				{(val) => (
 					<div class="size-full overflow-y-auto flex flex-col gap-3 p-4 [&_span]:font-semibold">
 						<div>
