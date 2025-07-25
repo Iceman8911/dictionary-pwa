@@ -1,11 +1,10 @@
 import { A } from "@solidjs/router";
-import DictionaryIcon from "lucide-solid/icons/book-marked";
 import SettingsIcon from "lucide-solid/icons/settings";
 
 export default function Header() {
 	return (
 		<h1 class="h-20 mb-4 text-3xl font-bold flex justify-center items-center gap-2">
-			<DictionaryIcon class="h-10 w-auto" />
+			<img class="h-10 w-auto" src="/pwa-64x64.png" alt="Dictionary Logo" />
 
 			<A href="/" end>
 				Lexi Cache
