@@ -1,13 +1,6 @@
 import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
-import {
-	createSignal,
-	For,
-	type JSX,
-	type Setter,
-	Show,
-	Suspense,
-} from "solid-js";
+import { createSignal, For, type JSX, Show, Suspense } from "solid-js";
 import { getSearchSuggestions } from "~/dictionaries/datamuse";
 import { fetchDictionaryResult } from "~/dictionaries/dictionary";
 import type { DictionaryWordResult } from "~/types/dictionary";
@@ -19,20 +12,29 @@ export default function Home() {
 	const [searchResult, setSearchResult] =
 		createSignal<NullableDictionaryWordResult>(null);
 
+	const searchWord = async (word: string) => {
+		setSearchResult(
+			await fetchDictionaryResult({
+				word: word,
+			}),
+		);
+	};
+
 	return (
 		<div class="grid grid-cols-2 grid-rows-[3rem_3rem_1fr] md:grid-rows-[3rem_1fr] gap-4 h-[75%] px-4">
-			<SearchBar searchResultSetter={setSearchResult} />
+			<SearchBar searchFunction={searchWord} />
 
-			<SearchResults searchResult={searchResult()} />
+			<SearchResults
+				searchResult={searchResult()}
+				searchFunction={searchWord}
+			/>
 
 			<SearchedWordInfo searchResult={searchResult()} />
 		</div>
 	);
 }
 
-function SearchBar(prop: {
-	searchResultSetter: Setter<NullableDictionaryWordResult>;
-}) {
+function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
 	const DATALIST_ID = generateUUID();
 
 	const [searchInput, setSearchInput] = createSignal("");
@@ -42,14 +44,6 @@ function SearchBar(prop: {
 
 		return Promise.resolve([]);
 	});
-
-	const search = async () => {
-		prop.searchResultSetter(
-			await fetchDictionaryResult({
-				word: searchInput(),
-			}),
-		);
-	};
 
 	return (
 		<label class="input input-primary col-span-2 justify-self-center self-center w-4/5 md:w-3/5">
@@ -65,10 +59,10 @@ function SearchBar(prop: {
 						setSearchInput("");
 					}
 				}}
-				onKeyUp={async ({ key }) => {
-					if (key === "Enter") search();
+				onKeyUp={({ key }) => {
+					if (key === "Enter") prop.searchFunction(searchInput());
 				}}
-				onChange={search}
+				onChange={(_) => prop.searchFunction(searchInput())}
 				list={DATALIST_ID}
 			/>
 
@@ -84,7 +78,10 @@ function SearchBar(prop: {
 }
 
 /** A list including the currently searched word and related ones */
-function SearchResults(prop: { searchResult: NullableDictionaryWordResult }) {
+function SearchResults(prop: {
+	searchResult: NullableDictionaryWordResult;
+	searchFunction: (word: string) => Promise<void>;
+}) {
 	const searchResultList = () =>
 		prop.searchResult
 			? [prop.searchResult.name, prop.searchResult.related.synonyms].flat()
@@ -96,7 +93,9 @@ function SearchResults(prop: { searchResult: NullableDictionaryWordResult }) {
 				<For each={searchResultList()}>
 					{(word) => (
 						<li>
-							<button type="button">{word}</button>
+							<button type="button" onClick={(_) => prop.searchFunction(word)}>
+								{word}
+							</button>
 						</li>
 					)}
 				</For>
