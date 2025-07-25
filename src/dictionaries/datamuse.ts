@@ -5,11 +5,11 @@ import { ABORT_EARLY_CONFIG } from "~/shared/valibot";
 import type { DictionaryWordResult, PartOfSpeech } from "~/types/dictionary";
 import { gIsUserConnectedToInternet } from "~/utils/internet";
 
-const BASE_URL = "https://api.datamuse.com";
+const { DATAMUSE: DATAMUSE_BASE_URL } = DICTIONARY_API;
 
-const WORDS_ENDPOINT = `${BASE_URL}/words`;
+const WORDS_ENDPOINT = `${DATAMUSE_BASE_URL}/words`;
 
-const SUGGESTION_ENDPOINT = `${BASE_URL}/sug`;
+const SUGGESTION_ENDPOINT = `${DATAMUSE_BASE_URL}/sug`;
 
 const GenericPayloadSchema = v.object({
 	word: v.pipe(
@@ -61,7 +61,7 @@ const getSearchSuggestions = query(
 	async (
 		payload: SuggestionPayloadInput,
 	): Promise<SuggestionResponseOutput> => {
-		if (await gIsUserConnectedToInternet()) {
+		try {
 			const { word: hint, maxResults } = v.parse(
 				SuggestionPayloadSchema,
 				payload,
@@ -79,9 +79,9 @@ const getSearchSuggestions = query(
 			);
 
 			return parsedResult;
+		} catch {
+			return [];
 		}
-
-		return [];
 	},
 	QUERY_NAME.SEARCH_SUGGESTIONS,
 );
@@ -298,7 +298,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 			examples: [],
 			frequency,
 			name: mainWordsResponse.word,
-			originApi: DICTIONARY_API.DATAMUSE,
+			originApi: DATAMUSE_BASE_URL,
 			partOfSpeech,
 			phonetics,
 			related: { antonyms: [], synonyms: [] },
@@ -331,7 +331,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 async function searchForWordDefinitionAndSynonyms(
 	payload: WordSearchPayloadInput,
 ): Promise<DictionaryWordResult | null> {
-	if (await gIsUserConnectedToInternet()) {
+	try {
 		const { word, maxResults } = v.parse(
 			WordSearchPayloadSchema,
 			payload,
@@ -379,7 +379,7 @@ async function searchForWordDefinitionAndSynonyms(
 			synonyms: parsedSynonymWords,
 			antonyms: parsedAntonymWords,
 		});
-	}
+	} catch {}
 
 	return null;
 }

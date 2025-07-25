@@ -8,7 +8,7 @@ type QUERY_NAME = (typeof QUERY_NAME)[keyof typeof QUERY_NAME];
 
 const DICTIONARY_API = {
 	/** https://www.datamuse.com/api */
-	DATAMUSE: "datamuse",
+	DATAMUSE: "https://api.datamuse.com",
 
 	/** https://dictionaryapi.dev */
 	DICTIONARY_API: "dictApi",

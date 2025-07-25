@@ -25,6 +25,27 @@ export default defineConfig({
 					additionalManifestEntries: [
 						{ url: "index.html", revision: "REV_INDEX_HTML_TO_CHANGE" },
 					],
+
+					/** Cache the API calls */
+					runtimeCaching: [
+						{
+							urlPattern: ({ url }) =>
+								url.origin === "https://api.datamuse.com",
+							handler: "StaleWhileRevalidate",
+							options: {
+								cacheName: "datamuse-api-calls",
+								expiration: {
+									maxEntries: 150,
+									maxAgeSeconds: 60 * 60,
+								},
+								cacheableResponse: {
+									statuses: [0, 200],
+								},
+							},
+						},
+					],
+
+					// navigateFallbackDenylist: [/^\/api/],
 				},
 
 				manifest: {
