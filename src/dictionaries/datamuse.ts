@@ -3,7 +3,6 @@ import * as v from "valibot";
 import { DICTIONARY_API, QUERY_NAME } from "~/shared/enums";
 import { ABORT_EARLY_CONFIG } from "~/shared/valibot";
 import type { DictionaryWordResult, PartOfSpeech } from "~/types/dictionary";
-import { gIsUserConnectedToInternet } from "~/utils/internet";
 
 const { DATAMUSE: DATAMUSE_BASE_URL } = DICTIONARY_API;
 
