@@ -52,7 +52,7 @@ export default defineConfig({
 					name: "Lexicache Dictionary",
 					short_name: "Lexicache",
 					description: "A simple dictionary PWA.",
-					// theme_color: "#ffffff",
+					theme_color: "#00000000",
 					icons: [
 						{
 							src: "/pwa-64x64.png",
@@ -114,6 +114,7 @@ export default defineConfig({
 					"cache-control": "public, max-age=0, must-revalidate",
 				},
 			},
+
 			"_build/sw.js": {
 				headers: {
 					"cache-control": "public, max-age=0, must-revalidate",
