@@ -22,7 +22,7 @@ export default function Home() {
 	};
 
 	return (
-		<div class="grid grid-cols-2 grid-rows-[3rem_3rem_1fr] md:grid-rows-[3rem_1fr] gap-4 h-[75%] px-4">
+		<div class="grid grid-cols-2 grid-rows-[3rem_3rem_1fr] md:grid-rows-[3rem_1fr] gap-4 h-[82.5%] px-4">
 			<SearchBar searchFunction={searchWord} />
 
 			<SearchResults
