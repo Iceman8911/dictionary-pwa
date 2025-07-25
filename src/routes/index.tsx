@@ -1,6 +1,7 @@
 import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
 import { createSignal, For, type JSX, Show, Suspense } from "solid-js";
+import LoadingSpinner from "~/components/loading-spinner";
 import { getSearchSuggestions } from "~/dictionaries/datamuse";
 import { fetchDictionaryResult } from "~/dictionaries/dictionary";
 import type { DictionaryWordResult } from "~/types/dictionary";
@@ -67,7 +68,7 @@ function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
 			/>
 
 			<datalist id={DATALIST_ID}>
-				<Suspense>
+				<Suspense fallback={<LoadingSpinner />}>
 					<For each={suggestions.latest}>
 						{({ word }) => <option value={word}></option>}
 					</For>
