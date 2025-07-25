@@ -30,7 +30,10 @@ export default function Home() {
 				searchFunction={searchWord}
 			/>
 
-			<SearchedWordInfo searchResult={searchResult()} />
+			<SearchedWordInfo
+				searchResult={searchResult()}
+				searchFunction={searchWord}
+			/>
 		</div>
 	);
 }
@@ -94,7 +97,11 @@ function SearchResults(prop: {
 				<For each={searchResultList()} fallback={<Placeholder />}>
 					{(word) => (
 						<li>
-							<button type="button" onClick={(_) => prop.searchFunction(word)}>
+							<button
+								type="button"
+								class="link link-primary"
+								onClick={(_) => prop.searchFunction(word)}
+							>
 								{word}
 							</button>
 						</li>
@@ -108,7 +115,10 @@ function SearchResults(prop: {
 /** Relevant data about the currently searched word */
 function SearchedWordInfo(prop: {
 	searchResult: NullableDictionaryWordResult;
+	searchFunction: (word: string) => Promise<void>;
 }) {
+	const searchFunc = (word: string) => prop.searchFunction(word);
+
 	function Definitions(prop: {
 		definitions: DictionaryWordResult["definitions"];
 	}) {
@@ -186,6 +196,36 @@ function SearchedWordInfo(prop: {
 		);
 	}
 
+	function RelatedWordList(prop: { list: string[]; name: string }) {
+		return (
+			<Show when={prop.list.length}>
+				{(length) => (
+					<div>
+						<span>{prop.name}: </span>
+
+						<For each={prop.list}>
+							{(synonym, index) => (
+								<>
+									<button
+										type="button"
+										class="link link-primary"
+										onClick={(_) => searchFunc(synonym)}
+									>
+										{synonym}
+									</button>
+
+									<Show when={index() + 1 < length()} fallback={"."}>
+										{", "}
+									</Show>
+								</>
+							)}
+						</For>
+					</div>
+				)}
+			</Show>
+		);
+	}
+
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1">
 			<Show when={prop.searchResult} fallback={<Placeholder />}>
@@ -211,17 +251,9 @@ function SearchedWordInfo(prop: {
 
 						<Frequency freq={val().frequency} />
 
-						<Show when={val().related.synonyms.length}>
-							<div>
-								<span>Synonyms:</span> {val().related.synonyms.join(", ")}
-							</div>
-						</Show>
+						<RelatedWordList list={val().related.synonyms} name="Synonyms" />
 
-						<Show when={val().related.antonyms.length}>
-							<div>
-								<span>Antonyms:</span> {val().related.antonyms.join(", ")}
-							</div>
-						</Show>
+						<RelatedWordList list={val().related.antonyms} name="Antonyms" />
 					</div>
 				)}
 			</Show>
