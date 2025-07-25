@@ -8,7 +8,6 @@ import {
 	Show,
 	Suspense,
 } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
 import { getSearchSuggestions } from "~/dictionaries/datamuse";
 import { fetchDictionaryResult } from "~/dictionaries/dictionary";
 import type { DictionaryWordResult } from "~/types/dictionary";
@@ -211,6 +210,18 @@ function SearchedWordInfo(prop: {
 						<Examples examples={val().examples} />
 
 						<Frequency freq={val().frequency} />
+
+						<Show when={val().related.synonyms.length}>
+							<div>
+								<span>Synonyms:</span> {val().related.synonyms.join(", ")}
+							</div>
+						</Show>
+
+						<Show when={val().related.antonyms.length}>
+							<div>
+								<span>Antonyms:</span> {val().related.antonyms.join(", ")}
+							</div>
+						</Show>
 					</div>
 				)}
 			</Show>
