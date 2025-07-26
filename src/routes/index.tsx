@@ -1,6 +1,13 @@
 import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
-import { createSignal, For, type JSX, Show, Suspense } from "solid-js";
+import {
+	createSignal,
+	For,
+	type JSX,
+	type Setter,
+	Show,
+	Suspense,
+} from "solid-js";
 import Placeholder from "~/components/placeholder";
 import { getSearchSuggestions } from "~/dictionaries/datamuse";
 import { fetchDictionaryResult } from "~/dictionaries/dictionary";
@@ -13,6 +20,8 @@ export default function Home() {
 	const [searchResult, setSearchResult] =
 		createSignal<NullableDictionaryWordResult>(null);
 
+	const [searchInput, setSearchInput] = createSignal("");
+
 	const searchWord = async (word: string) => {
 		setSearchResult(
 			await fetchDictionaryResult({
@@ -23,36 +32,45 @@ export default function Home() {
 
 	return (
 		<div class="grid grid-cols-2 grid-rows-[3rem_3rem_1fr] md:grid-rows-[3rem_1fr] gap-4 h-[85%] px-4 pb-4">
-			<SearchBar searchFunction={searchWord} />
+			<SearchBar
+				searchFunction={searchWord}
+				searchInput={searchInput()}
+				searchInputSetter={setSearchInput}
+			/>
 
 			<SearchResults
 				searchResult={searchResult()}
 				searchFunction={searchWord}
+				searchInputSetter={setSearchInput}
 			/>
 
 			<SearchedWordInfo
 				searchResult={searchResult()}
 				searchFunction={searchWord}
+				searchInputSetter={setSearchInput}
 			/>
 		</div>
 	);
 }
 
-function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
+function SearchBar(prop: {
+	searchFunction: (word: string) => Promise<void>;
+	searchInput: string;
+	searchInputSetter: Setter<string>;
+}) {
 	const DATALIST_ID = generateUUID();
 
-	const [searchInput, setSearchInput] = createSignal("");
-
 	const suggestions = createAsync(() => {
-		if (searchInput()) return getSearchSuggestions({ word: searchInput() });
+		if (prop.searchInput)
+			return getSearchSuggestions({ word: prop.searchInput });
 
 		return Promise.resolve([]);
 	});
 
 	const cleanInputAndSearch = () => {
-		setSearchInput((oldVal) => oldVal.trim());
+		prop.searchInputSetter((oldVal) => oldVal.trim());
 
-		prop.searchFunction(searchInput());
+		prop.searchFunction(prop.searchInput);
 	};
 
 	return (
@@ -62,12 +80,12 @@ function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
 			<input
 				type="search"
 				placeholder="Search for anything..."
-				value={searchInput()}
+				value={prop.searchInput}
 				onInput={({ target: { value } }) => {
 					if (value.length > 2) {
-						setSearchInput(value);
+						prop.searchInputSetter(value);
 					} else {
-						setSearchInput("");
+						prop.searchInputSetter("");
 					}
 				}}
 				onKeyUp={({ key }) => {
@@ -92,6 +110,7 @@ function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
 function SearchResults(prop: {
 	searchResult: NullableDictionaryWordResult;
 	searchFunction: (word: string) => Promise<void>;
+	searchInputSetter: Setter<string>;
 }) {
 	const searchResultList = () =>
 		prop.searchResult
@@ -107,7 +126,11 @@ function SearchResults(prop: {
 							<button
 								type="button"
 								class="link link-primary"
-								onClick={(_) => prop.searchFunction(word)}
+								onClick={(_) =>
+									prop
+										.searchFunction(word)
+										.then((_) => prop.searchInputSetter(word))
+								}
 							>
 								{word}
 							</button>
@@ -123,8 +146,10 @@ function SearchResults(prop: {
 function SearchedWordInfo(prop: {
 	searchResult: NullableDictionaryWordResult;
 	searchFunction: (word: string) => Promise<void>;
+	searchInputSetter: Setter<string>;
 }) {
-	const searchFunc = (word: string) => prop.searchFunction(word);
+	const searchFunc = (word: string) =>
+		prop.searchFunction(word).then((_) => prop.searchInputSetter(word));
 
 	function Definitions(prop: {
 		definitions: DictionaryWordResult["definitions"];
