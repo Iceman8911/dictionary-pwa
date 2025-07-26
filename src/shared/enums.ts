@@ -6,6 +6,7 @@ const QUERY_NAME = {
 
 type QUERY_NAME = (typeof QUERY_NAME)[keyof typeof QUERY_NAME];
 
+/** TODO: Each entry must link to it's corresponding api url */
 const DICTIONARY_API = {
 	/** https://www.datamuse.com/api */
 	DATAMUSE: "https://api.datamuse.com",
