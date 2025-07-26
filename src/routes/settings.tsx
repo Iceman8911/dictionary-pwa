@@ -1,9 +1,11 @@
-import { For } from "solid-js";
-import { createStore, produce, type StoreSetter } from "solid-js/store";
+import { trackStore } from "@solid-primitives/deep";
+import { createEffect, createRoot, For, on } from "solid-js";
+import { createStore, produce, unwrap, type StoreSetter } from "solid-js/store";
 import { DICTIONARY_API } from "~/shared/enums";
 import { gDefaultSettings, gSetSettings, gSettings } from "~/shared/store";
 import type { GlobalSettings } from "~/types/store";
 import { cloneStore } from "~/utils/store";
+import * as idb from "~/utils/idb";
 
 export default function Settings() {
 	const [tempSettings, _setTempSettings] = createStore<GlobalSettings>(
@@ -15,6 +17,16 @@ export default function Settings() {
 
 		_setTempSettings({ savedOn: new Date() });
 	};
+
+	/** save to indexedDB whenever changes are made */
+	createEffect(
+		on(
+			() => trackStore(gSettings),
+			() => {
+				idb.set(["settings", unwrap(gSettings)]);
+			},
+		),
+	);
 
 	let $form!: HTMLFormElement;
 

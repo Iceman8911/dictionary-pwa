@@ -6,8 +6,18 @@ import { pwaInfo } from "virtual:pwa-info";
 import { Link, MetaProvider } from "@solidjs/meta";
 import Header from "./components/header";
 import ReloadPrompt from "./components/reload-prompt";
+import { onMount } from "solid-js";
+import { gSetSettings } from "./shared/store";
+import * as idb from "~/utils/idb";
 
 export default function App() {
+	// Load up stored data
+	onMount(async () => {
+		const savedSettings = await idb.get("settings");
+
+		if (savedSettings) gSetSettings(savedSettings);
+	});
+
 	const webManifest = () => pwaInfo?.webManifest ?? null;
 
 	return (

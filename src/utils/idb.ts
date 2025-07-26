@@ -1,5 +1,5 @@
-import { GlobalSettings } from "~/types/store";
 import * as idb from "idb-keyval";
+import type { GlobalSettings } from "~/types/store";
 
 type IdbKeyAndValues = {
 	settings: GlobalSettings;
@@ -91,4 +91,4 @@ async function values(): Promise<IdbKeyAndValues[IdbKeys][]> {
 	return idb.values();
 }
 
-export { get, set, del, update, clear, entries, keys, values };
+export { clear, del, entries, get, keys, set, update, values };
