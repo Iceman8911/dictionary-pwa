@@ -49,6 +49,12 @@ function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
 		return Promise.resolve([]);
 	});
 
+	const cleanInputAndSearch = () => {
+		setSearchInput((oldVal) => oldVal.trim());
+
+		prop.searchFunction(searchInput());
+	};
+
 	return (
 		<label class="input input-primary col-span-2 justify-self-center self-center w-4/5 md:w-3/5">
 			<SearchIcon class="h-[75%] w-auto text-primary" strokeWidth={1} />
@@ -56,6 +62,7 @@ function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
 			<input
 				type="search"
 				placeholder="Search for anything..."
+				value={searchInput()}
 				onInput={({ target: { value } }) => {
 					if (value.length > 2) {
 						setSearchInput(value);
@@ -64,9 +71,9 @@ function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
 					}
 				}}
 				onKeyUp={({ key }) => {
-					if (key === "Enter") prop.searchFunction(searchInput());
+					if (key === "Enter") cleanInputAndSearch();
 				}}
-				onChange={(_) => prop.searchFunction(searchInput())}
+				onChange={cleanInputAndSearch}
 				list={DATALIST_ID}
 			/>
 
