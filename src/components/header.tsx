@@ -1,5 +1,6 @@
 import { A } from "@solidjs/router";
 import SettingsIcon from "lucide-solid/icons/settings";
+import InfoIcon from "lucide-solid/icons/info";
 
 export default function Header() {
 	return (
@@ -12,6 +13,10 @@ export default function Header() {
 
 			<A href="/settings" end>
 				<SettingsIcon class="h-8 w-auto ml-8" />
+			</A>
+
+			<A href="/about" end>
+				<InfoIcon class="h-8 w-auto md:ml-4" />
 			</A>
 		</h1>
 	);
