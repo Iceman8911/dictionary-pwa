@@ -147,11 +147,11 @@ function SearchResults(prop: {
 		<SharedContainer class="col-span-2 md:col-span-1 md:p-4">
 			<ul class="menu menu-horizontal md:menu-vertical size-full md:text-lg flex-nowrap overflow-x-auto">
 				<For each={searchResultList()} fallback={<Placeholder />}>
-					{(word) => (
+					{(word, index) => (
 						<li>
 							<button
 								type="button"
-								class="link link-primary"
+								class={`link ${index() === 0 ? "link-primary" : ""}`}
 								onClick={(_) =>
 									prop
 										.searchFunction(word)
