@@ -18,6 +18,7 @@ import {
 import { DICTIONARY_API } from "~/shared/enums";
 import { gSettings } from "~/shared/store";
 import type { DictionaryWordResult } from "~/types/dictionary";
+import { capitalizeString } from "~/utils/humanify";
 import { generateUUID } from "~/utils/other";
 
 type DictionaryWordResultCollection = Map<DICTIONARY_API, DictionaryWordResult>;
@@ -158,7 +159,7 @@ function SearchResults(prop: {
 										.then((_) => prop.searchInputSetter(word))
 								}
 							>
-								{word}
+								{capitalizeString(word)}
 							</button>
 						</li>
 					)}
@@ -334,7 +335,8 @@ function SearchedWordInfo(prop: {
 						</Show>
 
 						<div>
-							<span>Name:</span> <span class="text-primary">{val().name}</span>
+							<span>Name:</span>{" "}
+							<span class="text-primary">{capitalizeString(val().name)}</span>
 						</div>
 
 						<div>

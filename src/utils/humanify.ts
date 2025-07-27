@@ -42,4 +42,14 @@ function prettifyTime(
 	return `${(timeInMilliseconds / TO_YEARS).toFixed(2)} years`;
 }
 
-export { prettifyTime };
+function capitalizeString(string: string): string {
+	const words = string.split(" ");
+
+	const capitalize = (str: string) => {
+		return (str[0] ?? "").toLocaleUpperCase() + str.slice(1);
+	};
+
+	return words.map((word) => capitalize(word)).join(" ");
+}
+
+export { prettifyTime, capitalizeString };
