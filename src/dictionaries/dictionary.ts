@@ -1,4 +1,4 @@
-import { DICTIONARY_API } from "~/shared/enums";
+import { DICTIONARY_API as DictionaryApis } from "~/shared/enums";
 import { gSettings } from "~/shared/store";
 import type {
 	DictionaryWordIndexeddbKey,
@@ -16,7 +16,7 @@ import { searchForWordDefinitionAndSynonyms } from "./datamuse";
 async function fetchDictionaryResult(payload: {
 	word: string;
 	maxResults?: number;
-	dictionary?: DICTIONARY_API;
+	dictionary?: DictionaryApis;
 }): Promise<DictionaryWordResult | null> {
 	const { word, dictionary, maxResults = 10 } = payload;
 
@@ -25,7 +25,7 @@ async function fetchDictionaryResult(payload: {
 		return fetchFromApi(dictionary, word, maxResults);
 	}
 
-	const APIS_TO_TRY = Object.values(DICTIONARY_API);
+	const APIS_TO_TRY = Object.values(DictionaryApis);
 
 	for (const api of APIS_TO_TRY) {
 		const result = await fetchFromApi(api, word, maxResults);
@@ -38,15 +38,11 @@ async function fetchDictionaryResult(payload: {
 }
 
 async function fetchFromApi(
-	api: DICTIONARY_API,
+	api: DictionaryApis,
 	word: string,
 	maxResults: number,
 ): Promise<DictionaryWordResult | null> {
-	const {
-		DATAMUSE,
-		DICTIONARY_API: DICTIONARY_API_1,
-		FREE_DICTIONARY: DICTIONARY_API_2,
-	} = DICTIONARY_API;
+	const { DATAMUSE, DICTIONARY_API, FREE_DICTIONARY } = DictionaryApis;
 
 	const cacheKey: DictionaryWordIndexeddbKey = `${api}-${word}`;
 
@@ -72,13 +68,13 @@ async function fetchFromApi(
 			break;
 		}
 
-		case DICTIONARY_API_1: {
+		case DICTIONARY_API: {
 			fetchedData = null;
 
 			break;
 		}
 
-		case DICTIONARY_API_2: {
+		case FREE_DICTIONARY: {
 			fetchedData = null;
 
 			break;
@@ -104,7 +100,7 @@ function isCachedEntryExpired(
 }
 
 function isStringDictionaryKey(str: string): str is DictionaryWordIndexeddbKey {
-	return Object.values(DICTIONARY_API).includes(
+	return Object.values(DictionaryApis).includes(
 		(str.split("-")[0] ?? "") as never,
 	);
 }
@@ -175,4 +171,26 @@ async function cleanupExpiredCachedEntriesWhenAboveSizeLimit() {
 	}
 }
 
-export { fetchDictionaryResult, cleanupExpiredCachedEntriesWhenAboveSizeLimit };
+function getNameOfDictionaryApi(api: DictionaryApis) {
+	const { DATAMUSE, DICTIONARY_API, FREE_DICTIONARY } = DictionaryApis;
+
+	switch (api) {
+		case DATAMUSE:
+			return "Datamuse";
+
+		case DICTIONARY_API:
+			return "Dictionary Api";
+
+		case FREE_DICTIONARY:
+			return "Free Dictionary";
+
+		default:
+			return "Null";
+	}
+}
+
+export {
+	fetchDictionaryResult,
+	cleanupExpiredCachedEntriesWhenAboveSizeLimit,
+	getNameOfDictionaryApi,
+};

@@ -1,6 +1,7 @@
 import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
 import {
+	createMemo,
 	createSignal,
 	For,
 	type JSX,
@@ -10,23 +11,41 @@ import {
 } from "solid-js";
 import Placeholder from "~/components/placeholder";
 import { getSearchSuggestions } from "~/dictionaries/datamuse";
-import { fetchDictionaryResult } from "~/dictionaries/dictionary";
+import {
+	fetchDictionaryResult,
+	getNameOfDictionaryApi,
+} from "~/dictionaries/dictionary";
+import { DICTIONARY_API } from "~/shared/enums";
+import { gSettings } from "~/shared/store";
 import type { DictionaryWordResult } from "~/types/dictionary";
 import { generateUUID } from "~/utils/other";
 
-type NullableDictionaryWordResult = DictionaryWordResult | null;
+type DictionaryWordResultCollection = Map<DICTIONARY_API, DictionaryWordResult>;
 
 export default function Home() {
-	const [searchResult, setSearchResult] =
-		createSignal<NullableDictionaryWordResult>(null);
+	const [searchResults, setSearchResults] =
+		createSignal<DictionaryWordResultCollection>(new Map());
 
 	const [searchInput, setSearchInput] = createSignal("");
 
 	const searchWord = async (word: string) => {
-		setSearchResult(
-			await fetchDictionaryResult({
-				word: word,
-			}),
+		setSearchResults(
+			(
+				await Promise.allSettled(
+					[...gSettings.dictionaries].map((dictionary) =>
+						fetchDictionaryResult({
+							word: word,
+							dictionary,
+						}),
+					),
+				)
+			).reduce<DictionaryWordResultCollection>((acc, val) => {
+				if (val.status === "fulfilled" && val.value) {
+					acc.set(val.value.originApi, val.value);
+				}
+
+				return acc;
+			}, new Map()),
 		);
 	};
 
@@ -39,13 +58,13 @@ export default function Home() {
 			/>
 
 			<SearchResults
-				searchResult={searchResult()}
+				searchResult={searchResults()}
 				searchFunction={searchWord}
 				searchInputSetter={setSearchInput}
 			/>
 
 			<SearchedWordInfo
-				searchResult={searchResult()}
+				searchResult={searchResults()}
 				searchFunction={searchWord}
 				searchInputSetter={setSearchInput}
 			/>
@@ -108,14 +127,21 @@ function SearchBar(prop: {
 
 /** A list including the currently searched word and related ones */
 function SearchResults(prop: {
-	searchResult: NullableDictionaryWordResult;
+	searchResult: DictionaryWordResultCollection;
 	searchFunction: (word: string) => Promise<void>;
 	searchInputSetter: Setter<string>;
 }) {
-	const searchResultList = () =>
-		prop.searchResult
-			? [prop.searchResult.name, prop.searchResult.related.synonyms].flat()
-			: [];
+	const searchResultList = createMemo(() =>
+		prop.searchResult.size
+			? [
+					...new Set(
+						[...prop.searchResult.values()]
+							.map((res) => (res ? [res.name, res.related.synonyms] : []))
+							.flat(2),
+					),
+				]
+			: [],
+	);
 
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1 md:p-4">
@@ -144,7 +170,7 @@ function SearchResults(prop: {
 
 /** Relevant data about the currently searched word */
 function SearchedWordInfo(prop: {
-	searchResult: NullableDictionaryWordResult;
+	searchResult: DictionaryWordResultCollection;
 	searchFunction: (word: string) => Promise<void>;
 	searchInputSetter: Setter<string>;
 }) {
@@ -258,11 +284,55 @@ function SearchedWordInfo(prop: {
 		);
 	}
 
+	const apiResultSourceFromSearchResults = () =>
+		[...prop.searchResult.keys()][0] ?? null;
+
+	const [apiResultSourceFromUserChoice, setApiResultFromUserChoice] =
+		createSignal<DICTIONARY_API | null>(null);
+
+	const apiResultSourceToView = createMemo(
+		() => apiResultSourceFromUserChoice() ?? apiResultSourceFromSearchResults(),
+	);
+
+	const apiResultToView = createMemo(() =>
+		prop.searchResult.get(apiResultSourceToView() ?? DICTIONARY_API.DATAMUSE),
+	);
+
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1">
-			<Show when={prop.searchResult} fallback={<Placeholder />}>
+			<Show when={apiResultToView()} fallback={<Placeholder />}>
 				{(val) => (
 					<div class="size-full overflow-y-auto flex flex-col gap-3 p-4 [&_span]:font-semibold">
+						<div>
+							<span>Sourced From:</span>{" "}
+							<span class="text-primary">
+								{getNameOfDictionaryApi(val().originApi)}
+							</span>
+						</div>
+
+						<Show when={prop.searchResult.size > 1}>
+							<div>
+								<span>Other Sources:</span>{" "}
+								<For each={[...prop.searchResult]}>
+									{(res) => (
+										<Show when={res[0] !== apiResultSourceToView() && res[1]}>
+											{(res) => (
+												<button
+													type="button"
+													class="text-primary"
+													onClick={(_) =>
+														setApiResultFromUserChoice(res().originApi)
+													}
+												>
+													{getNameOfDictionaryApi(res().originApi)}
+												</button>
+											)}
+										</Show>
+									)}
+								</For>
+							</div>
+						</Show>
+
 						<div>
 							<span>Name:</span> {val().name}
 						</div>
