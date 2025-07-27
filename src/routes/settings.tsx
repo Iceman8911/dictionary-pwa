@@ -30,16 +30,8 @@ export default function Settings() {
 
 	let $form!: HTMLFormElement;
 
-	return (
-		<form
-			class="p-4 h-[85%] relative"
-			onSubmit={(e) => {
-				e.preventDefault();
-
-				gSetSettings(tempSettings);
-			}}
-			ref={$form}
-		>
+	function SelectedDictionaryApis() {
+		return (
 			<fieldset class="fieldset bg-base-100 border-base-300 rounded-box w-fit border p-4">
 				<legend class="fieldset-legend">Dictionaries To Use</legend>
 
@@ -73,6 +65,20 @@ export default function Settings() {
 					</For>
 				</div>
 			</fieldset>
+		);
+	}
+
+	return (
+		<form
+			class="p-4 h-[85%] relative"
+			onSubmit={(e) => {
+				e.preventDefault();
+
+				gSetSettings(tempSettings);
+			}}
+			ref={$form}
+		>
+			<SelectedDictionaryApis />
 
 			<div class="flex gap-4 absolute bottom-[4vh] right-[6vw]">
 				<button
