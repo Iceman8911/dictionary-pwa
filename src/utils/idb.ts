@@ -1,8 +1,15 @@
 import * as idb from "idb-keyval";
+import {
+	DictionaryIndexeddbKey,
+	DictionaryWordResult,
+} from "~/types/dictionary";
 import type { GlobalSettings } from "~/types/store";
 
 type IdbKeyAndValues = {
 	settings: GlobalSettings;
+
+	/** For every cached word and it's source */
+	[key: DictionaryIndexeddbKey]: { cachedOn: Date; data: DictionaryWordResult };
 };
 
 type IdbKeys = keyof IdbKeyAndValues;

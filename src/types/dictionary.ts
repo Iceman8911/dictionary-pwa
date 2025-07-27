@@ -40,4 +40,7 @@ type PartOfSpeech =
 	| "determiner"
 	| null;
 
-export type { DictionaryWordResult, PartOfSpeech };
+/** The api's url and the word searched */
+type DictionaryIndexeddbKey = `${DICTIONARY_API}-${string}`;
+
+export type { DictionaryWordResult, PartOfSpeech, DictionaryIndexeddbKey };

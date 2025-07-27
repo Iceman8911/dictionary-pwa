@@ -1,6 +1,12 @@
 import { DICTIONARY_API } from "~/shared/enums";
-import type { DictionaryWordResult } from "~/types/dictionary";
+import type {
+	DictionaryIndexeddbKey,
+	DictionaryWordResult,
+} from "~/types/dictionary";
 import { searchForWordDefinitionAndSynonyms } from "./datamuse";
+import * as idb from "~/utils/idb";
+import { gSettings } from "~/shared/store";
+import { gIsUserConnectedToInternet } from "~/utils/internet";
 
 /** Attempts to get the dictionary results of a particular word.
  *
@@ -41,23 +47,54 @@ async function fetchFromApi(
 		FREE_DICTIONARY: DICTIONARY_API_2,
 	} = DICTIONARY_API;
 
+	const cacheKey: DictionaryIndexeddbKey = `${api}-${word}`;
+
+	const cachedData = await idb.get(cacheKey);
+
+	// If the cache is present and has not expired or the user is offline
+	if (
+		(cachedData &&
+			cachedData.cachedOn.getTime() + gSettings.cacheDuration > Date.now()) ||
+		!(await gIsUserConnectedToInternet())
+	) {
+		return cachedData!.data;
+	}
+
+	let fetchedData: DictionaryWordResult | null = null;
+
 	switch (api) {
 		case DATAMUSE: {
-			return searchForWordDefinitionAndSynonyms({ word, maxResults });
+			fetchedData = await searchForWordDefinitionAndSynonyms({
+				word,
+				maxResults,
+			});
+
+			break;
 		}
 
 		case DICTIONARY_API_1: {
-			return null;
+			fetchedData = null;
+
+			break;
 		}
 
 		case DICTIONARY_API_2: {
-			return null;
+			fetchedData = null;
+
+			break;
 		}
 
 		default: {
 			return null;
 		}
 	}
+
+	if (fetchedData) {
+		// No need to await this since we can afford to
+		idb.set([cacheKey, { cachedOn: new Date(), data: fetchedData }]);
+	}
+
+	return fetchedData;
 }
 
 export { fetchDictionaryResult };
