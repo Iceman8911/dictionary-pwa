@@ -187,7 +187,7 @@ function SearchedWordInfo(prop: {
 						<>
 							<span>Definitions:</span>
 
-							<ul class="mt-1">
+							<ul class="mt-1 flex flex-col gap-1">
 								<For each={definitions()}>
 									{({ definition, partOfSpeech }, index) => (
 										<li>
