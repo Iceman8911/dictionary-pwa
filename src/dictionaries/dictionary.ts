@@ -2,6 +2,7 @@ import { DICTIONARY_API } from "~/shared/enums";
 import { gSettings } from "~/shared/store";
 import type {
 	DictionaryIndexeddbKey,
+	DictionaryIndexeddbValue,
 	DictionaryWordResult,
 } from "~/types/dictionary";
 import * as idb from "~/utils/idb";
@@ -54,8 +55,7 @@ async function fetchFromApi(
 	// If the cache is present and has not expired or the user is offline
 	if (
 		cachedData &&
-		(cachedData.cachedOn.getTime() + gSettings.cacheDuration > Date.now() ||
-			!(await gIsUserConnectedToInternet()))
+		(!isCachedEntryExpired(cachedData) || !(await gIsUserConnectedToInternet()))
 	) {
 		return cachedData.data;
 	}
@@ -97,4 +97,80 @@ async function fetchFromApi(
 	return fetchedData;
 }
 
-export { fetchDictionaryResult };
+function isCachedEntryExpired(cachedEntry: DictionaryIndexeddbValue): boolean {
+	return cachedEntry.cachedOn.getTime() + gSettings.cacheDuration < Date.now();
+}
+
+function isStringDictionaryKey(str: string): str is DictionaryIndexeddbKey {
+	return Object.values(DICTIONARY_API).includes(
+		(str.split("-")[0] ?? "") as never,
+	);
+}
+
+function getCacheKeyFromDictionaryResult(
+	data: DictionaryWordResult,
+): DictionaryIndexeddbKey {
+	return `${data.originApi}-${data.name}`;
+}
+
+async function cleanupExpiredCachedEntriesWhenAboveSizeLimit() {
+	const cacheKeys: ReadonlyArray<DictionaryIndexeddbKey> = (
+		await idb.keys()
+	).filter((key) => isStringDictionaryKey(key));
+
+	const cacheKeySize = cacheKeys.length;
+
+	// The limit hasn't been reached yet so don't do anything
+	if (cacheKeySize < gSettings.cacheSize) return;
+
+	/** So we don't load up everything into memory unreasonably */
+	async function* processCachedDataBatchByBatch(
+		keys: ReadonlyArray<DictionaryIndexeddbKey>,
+		batchSize: number,
+	): AsyncGenerator<ReadonlyArray<DictionaryIndexeddbValue>> {
+		const batch: Promise<DictionaryIndexeddbValue | undefined>[] = [];
+
+		async function resolveBatch(
+			batch: Promise<DictionaryIndexeddbValue | undefined>[],
+		): Promise<ReadonlyArray<DictionaryIndexeddbValue>> {
+			return Promise.allSettled(batch).then((results) =>
+				results.reduce<DictionaryIndexeddbValue[]>((acc, val) => {
+					if (val.status === "fulfilled" && val.value) {
+						acc.push(val.value);
+					}
+
+					return acc;
+				}, []),
+			);
+		}
+
+		for (const key of keys) {
+			batch.push(idb.get(key));
+
+			if (batch.length === batchSize) {
+				yield resolveBatch(batch);
+			}
+		}
+
+		if (batch.length) {
+			yield resolveBatch(batch);
+		}
+	}
+
+	for await (const batch of processCachedDataBatchByBatch(
+		cacheKeys,
+		gSettings.cleanup.batchSize,
+	)) {
+		batch.forEach((val) => {
+			const key = getCacheKeyFromDictionaryResult(val.data);
+
+			if (isCachedEntryExpired(val))
+				// We can afford to not `await` this
+				idb.del(key);
+
+			// REVIEW: Should non-expired entries be deleted if we're still above the size limit?
+		});
+	}
+}
+
+export { fetchDictionaryResult, cleanupExpiredCachedEntriesWhenAboveSizeLimit };
