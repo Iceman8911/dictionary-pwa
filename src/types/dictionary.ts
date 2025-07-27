@@ -41,13 +41,16 @@ type PartOfSpeech =
 	| null;
 
 /** The api's url and the word searched */
-type DictionaryIndexeddbKey = `${DICTIONARY_API}-${string}`;
+type DictionaryWordIndexeddbKey = `${DICTIONARY_API}-${string}`;
 
-type DictionaryIndexeddbValue = { cachedOn: Date; data: DictionaryWordResult };
+type DictionaryWordIndexeddbValue = {
+	cachedOn: Date;
+	data: DictionaryWordResult;
+};
 
 export type {
 	DictionaryWordResult,
 	PartOfSpeech,
-	DictionaryIndexeddbKey,
-	DictionaryIndexeddbValue,
+	DictionaryWordIndexeddbKey,
+	DictionaryWordIndexeddbValue,
 };

@@ -1,8 +1,8 @@
 import { DICTIONARY_API } from "~/shared/enums";
 import { gSettings } from "~/shared/store";
 import type {
-	DictionaryIndexeddbKey,
-	DictionaryIndexeddbValue,
+	DictionaryWordIndexeddbKey,
+	DictionaryWordIndexeddbValue,
 	DictionaryWordResult,
 } from "~/types/dictionary";
 import * as idb from "~/utils/idb";
@@ -48,7 +48,7 @@ async function fetchFromApi(
 		FREE_DICTIONARY: DICTIONARY_API_2,
 	} = DICTIONARY_API;
 
-	const cacheKey: DictionaryIndexeddbKey = `${api}-${word}`;
+	const cacheKey: DictionaryWordIndexeddbKey = `${api}-${word}`;
 
 	const cachedData = await idb.get(cacheKey);
 
@@ -97,11 +97,13 @@ async function fetchFromApi(
 	return fetchedData;
 }
 
-function isCachedEntryExpired(cachedEntry: DictionaryIndexeddbValue): boolean {
+function isCachedEntryExpired(
+	cachedEntry: DictionaryWordIndexeddbValue,
+): boolean {
 	return cachedEntry.cachedOn.getTime() + gSettings.cacheDuration < Date.now();
 }
 
-function isStringDictionaryKey(str: string): str is DictionaryIndexeddbKey {
+function isStringDictionaryKey(str: string): str is DictionaryWordIndexeddbKey {
 	return Object.values(DICTIONARY_API).includes(
 		(str.split("-")[0] ?? "") as never,
 	);
@@ -109,12 +111,12 @@ function isStringDictionaryKey(str: string): str is DictionaryIndexeddbKey {
 
 function getCacheKeyFromDictionaryResult(
 	data: DictionaryWordResult,
-): DictionaryIndexeddbKey {
+): DictionaryWordIndexeddbKey {
 	return `${data.originApi}-${data.name}`;
 }
 
 async function cleanupExpiredCachedEntriesWhenAboveSizeLimit() {
-	const cacheKeys: ReadonlyArray<DictionaryIndexeddbKey> = (
+	const cacheKeys: ReadonlyArray<DictionaryWordIndexeddbKey> = (
 		await idb.keys()
 	).filter((key) => isStringDictionaryKey(key));
 
@@ -125,16 +127,16 @@ async function cleanupExpiredCachedEntriesWhenAboveSizeLimit() {
 
 	/** So we don't load up everything into memory unreasonably */
 	async function* processCachedDataBatchByBatch(
-		keys: ReadonlyArray<DictionaryIndexeddbKey>,
+		keys: ReadonlyArray<DictionaryWordIndexeddbKey>,
 		batchSize: number,
-	): AsyncGenerator<ReadonlyArray<DictionaryIndexeddbValue>> {
-		const batch: Promise<DictionaryIndexeddbValue | undefined>[] = [];
+	): AsyncGenerator<ReadonlyArray<DictionaryWordIndexeddbValue>> {
+		const batch: Promise<DictionaryWordIndexeddbValue | undefined>[] = [];
 
 		async function resolveBatch(
-			batch: Promise<DictionaryIndexeddbValue | undefined>[],
-		): Promise<ReadonlyArray<DictionaryIndexeddbValue>> {
+			batch: Promise<DictionaryWordIndexeddbValue | undefined>[],
+		): Promise<ReadonlyArray<DictionaryWordIndexeddbValue>> {
 			return Promise.allSettled(batch).then((results) =>
-				results.reduce<DictionaryIndexeddbValue[]>((acc, val) => {
+				results.reduce<DictionaryWordIndexeddbValue[]>((acc, val) => {
 					if (val.status === "fulfilled" && val.value) {
 						acc.push(val.value);
 					}
