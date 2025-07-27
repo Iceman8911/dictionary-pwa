@@ -334,7 +334,7 @@ function SearchedWordInfo(prop: {
 						</Show>
 
 						<div>
-							<span>Name:</span> {val().name}
+							<span>Name:</span> <span class="text-primary">{val().name}</span>
 						</div>
 
 						<div>
