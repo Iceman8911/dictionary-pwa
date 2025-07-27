@@ -81,7 +81,7 @@ function SearchBar(prop: {
 	const DATALIST_ID = generateUUID();
 
 	const suggestions = createAsync(() => {
-		if (prop.searchInput)
+		if (prop.searchInput.length > 2)
 			return getSearchSuggestions({ word: prop.searchInput });
 
 		return Promise.resolve([]);
@@ -102,11 +102,7 @@ function SearchBar(prop: {
 				placeholder="Search for anything..."
 				value={prop.searchInput}
 				onInput={({ target: { value } }) => {
-					if (value.length > 2) {
-						prop.searchInputSetter(value);
-					} else {
-						prop.searchInputSetter("");
-					}
+					prop.searchInputSetter(value);
 				}}
 				onKeyUp={({ key }) => {
 					if (key === "Enter") cleanInputAndSearch();
