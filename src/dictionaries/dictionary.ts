@@ -1,12 +1,12 @@
 import { DICTIONARY_API } from "~/shared/enums";
+import { gSettings } from "~/shared/store";
 import type {
 	DictionaryIndexeddbKey,
 	DictionaryWordResult,
 } from "~/types/dictionary";
-import { searchForWordDefinitionAndSynonyms } from "./datamuse";
 import * as idb from "~/utils/idb";
-import { gSettings } from "~/shared/store";
 import { gIsUserConnectedToInternet } from "~/utils/internet";
+import { searchForWordDefinitionAndSynonyms } from "./datamuse";
 
 /** Attempts to get the dictionary results of a particular word.
  *
@@ -53,11 +53,11 @@ async function fetchFromApi(
 
 	// If the cache is present and has not expired or the user is offline
 	if (
-		(cachedData &&
-			cachedData.cachedOn.getTime() + gSettings.cacheDuration > Date.now()) ||
-		!(await gIsUserConnectedToInternet())
+		cachedData &&
+		(cachedData.cachedOn.getTime() + gSettings.cacheDuration > Date.now() ||
+			!(await gIsUserConnectedToInternet()))
 	) {
-		return cachedData!.data;
+		return cachedData.data;
 	}
 
 	let fetchedData: DictionaryWordResult | null = null;
