@@ -183,7 +183,9 @@ function convertWordSearchResponseOutputToDictionarySchema(
 
 		if (frequency > 40) return "uncommon";
 
-		return "rare";
+		if (frequency > 10) return "rare";
+
+		return "very rare";
 	}
 
 	/** To turn it to more consistent values */

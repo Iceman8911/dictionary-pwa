@@ -24,7 +24,13 @@ type DictionaryWordResult = Readonly<{
 
 	audioUrl: URL | null;
 
-	frequency: "very common" | "common" | "uncommon" | "rare" | null;
+	frequency:
+		| "very common"
+		| "common"
+		| "uncommon"
+		| "rare"
+		| "very rare"
+		| null;
 }>;
 
 type PartOfSpeech =
