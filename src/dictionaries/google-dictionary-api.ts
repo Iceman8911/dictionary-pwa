@@ -39,15 +39,7 @@ const ResponseSchema = v.pipe(
 						sourceUrl: v.optional(UrlString),
 
 						/** License data */
-						license: v.optional(
-							v.object({
-								/** License name: `BY-SA 3.0` */
-								name: v.string(),
-
-								/** Url to the license in question */
-								url: UrlString,
-							}),
-						),
+						license: v.optional(LicenseSchema),
 
 						/** IPA pronounciation */
 						text: v.optional(IpaPhoneticSchema),
