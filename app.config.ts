@@ -31,14 +31,21 @@ export default defineConfig({
 						{
 							urlPattern: ({ url: { origin, pathname } }) =>
 								origin === "https://api.datamuse.com" && pathname === "/sug",
+
 							handler: "StaleWhileRevalidate",
+
 							options: {
 								cacheName: "datamuse-api-calls",
+
 								expiration: {
 									// On average, there will be 3 suggestion api calls per word, and this should cache up to a 100 word suggestions, give or take
 									maxEntries: 310,
+
 									maxAgeSeconds: 60 * 60,
+
+									purgeOnQuotaError: true,
 								},
+
 								cacheableResponse: {
 									statuses: [0, 200],
 								},
