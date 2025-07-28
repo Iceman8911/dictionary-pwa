@@ -212,7 +212,7 @@ function SearchedWordInfo(prop: {
 						<>
 							<span>Examples:</span>
 
-							<ul class="mt-1">
+							<ul class="mt-1  flex flex-col gap-1">
 								<For each={examples()}>
 									{({ example, partOfSpeech }, index) => {
 										// Highlight the specific word in the example, but extracting it from the string and acdding the word manually
