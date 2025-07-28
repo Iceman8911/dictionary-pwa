@@ -16,7 +16,10 @@ type GlobalSettings = {
 	 */
 	cacheDuration: number;
 
-	/** Maximum amount of search queries that can be cached before older entries get replaced */
+	/** Maximum amount of search queries that can be cached before older entries get replaced.
+	 *
+	 * **DOES NOT INCLUDE CACHED SUGGESTIONS OR AUDIO FILES**
+	 */
 	cacheSize: number;
 
 	/** Settings related to the cleanup process that regularly occurs */
