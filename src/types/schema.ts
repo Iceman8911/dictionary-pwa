@@ -6,4 +6,19 @@ type UrlString = v.InferOutput<typeof UrlString>;
 
 const StringArraySchema = v.array(v.string());
 
-export { UrlString, StringArraySchema };
+const PartOfSpeech = v.union([
+	v.literal("noun"),
+	v.literal("pronoun"),
+	v.literal("verb"),
+	v.literal("adjective"),
+	v.literal("adverb"),
+	v.literal("preposition"),
+	v.literal("conjunction"),
+	v.literal("interjection"),
+	v.literal("article"),
+	v.literal("determiner"),
+]);
+
+type PartOfSpeech = v.InferOutput<typeof PartOfSpeech>;
+
+export { UrlString, StringArraySchema, PartOfSpeech };

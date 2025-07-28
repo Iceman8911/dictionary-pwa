@@ -2,7 +2,8 @@ import { query } from "@solidjs/router";
 import * as v from "valibot";
 import { DICTIONARY_API, QUERY_NAME } from "~/shared/enums";
 import { ABORT_EARLY_CONFIG } from "~/shared/valibot";
-import type { DictionaryWordResult, PartOfSpeech } from "~/types/dictionary";
+import type { DictionaryWordResult } from "~/types/dictionary";
+import type { PartOfSpeech } from "~/types/schema";
 
 const { DATAMUSE: DATAMUSE_BASE_URL } = DICTIONARY_API;
 

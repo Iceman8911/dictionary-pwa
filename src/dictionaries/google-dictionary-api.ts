@@ -3,9 +3,8 @@ import { DICTIONARY_API } from "~/shared/enums";
 import {
 	type DictionaryWordResult,
 	IpaPhoneticSchema,
-	type PartOfSpeech,
 } from "~/types/dictionary";
-import { StringArraySchema, UrlString } from "~/types/schema";
+import { PartOfSpeech, StringArraySchema, UrlString } from "~/types/schema";
 import { getRandomElementInArray } from "~/utils/other";
 
 const { GOOGLE_DICTIONARY_API } = DICTIONARY_API;
@@ -46,9 +45,7 @@ const ResponseSchema = v.pipe(
 
 				meanings: v.array(
 					v.object({
-						partOfSpeech: v.custom<NonNullable<PartOfSpeech>>(
-							(input) => typeof input === "string",
-						),
+						partOfSpeech: PartOfSpeech,
 
 						/** Each array element will have a seperate definition and maybe synonyms / antonyms that relate to that particular definition */
 						definitions: v.array(
