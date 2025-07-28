@@ -128,7 +128,7 @@ const WordSearchResponseSchema = v.pipe(
 				word: v.string(),
 
 				/** Ranking of the word in relation to the others in the array */
-				score: v.number(),
+				score: v.optional(v.number()),
 
 				/** Definitions for th word */
 				defs: v.optional(
@@ -380,7 +380,14 @@ async function searchForWordDefinitionAndSynonyms(
 			synonyms: parsedSynonymWords,
 			antonyms: parsedAntonymWords,
 		});
-	} catch {}
+	} catch (e) {
+		console.warn(
+			"Error when searching for '",
+			payload.word,
+			"' with Datamuse: ",
+			e,
+		);
+	}
 
 	return null;
 }
