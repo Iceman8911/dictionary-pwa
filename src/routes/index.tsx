@@ -244,7 +244,7 @@ function SearchedWordInfo(prop: {
 				{(audioUrl) => (
 					<div>
 						<span>Audio Url:</span>{" "}
-						<a class="link link-info" href={audioUrl().toString()}>
+						<a class="link link-info break-words" href={audioUrl().toString()}>
 							{audioUrl().toString()}
 						</a>
 					</div>
