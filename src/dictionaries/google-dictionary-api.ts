@@ -5,14 +5,10 @@ import {
 	IpaPhoneticSchema,
 	type PartOfSpeech,
 } from "~/types/dictionary";
+import { UrlString } from "~/types/other";
 import { getRandomElementInArray } from "~/utils/other";
 
 const { GOOGLE_DICTIONARY_API } = DICTIONARY_API;
-
-const UrlStringToProperUrlSchema = v.pipe(
-	v.string(),
-	v.transform((str) => new URL(str)),
-);
 
 const StringArraySchema = v.array(v.string());
 
@@ -21,7 +17,7 @@ const LicenseSchema = v.object({
 	name: v.string(),
 
 	/** Url to the license in question */
-	url: UrlStringToProperUrlSchema,
+	url: UrlString,
 });
 
 const ResponseSchema = v.pipe(
@@ -37,13 +33,10 @@ const ResponseSchema = v.pipe(
 				phonetics: v.array(
 					v.object({
 						/** Url to an mp3 pronounciation */
-						audio: v.pipe(
-							v.string(),
-							v.transform((str) => (str ? new URL(str) : null)),
-						),
+						audio: v.union([UrlString, v.literal("")]),
 
 						/** Url to it's wikimedia source */
-						sourceUrl: v.optional(UrlStringToProperUrlSchema),
+						sourceUrl: v.optional(UrlString),
 
 						/** License data */
 						license: v.optional(
@@ -52,7 +45,7 @@ const ResponseSchema = v.pipe(
 								name: v.string(),
 
 								/** Url to the license in question */
-								url: UrlStringToProperUrlSchema,
+								url: UrlString,
 							}),
 						),
 
@@ -89,7 +82,7 @@ const ResponseSchema = v.pipe(
 
 				license: LicenseSchema,
 
-				sourceUrls: v.array(UrlStringToProperUrlSchema),
+				sourceUrls: v.array(UrlString),
 			}),
 			v.readonly(),
 		),
@@ -121,7 +114,7 @@ function convertResponseToDictionaryResult(
 	const { meanings, phonetic, phonetics, word } = response[0];
 
 	const [ipaPhonetics, audioUrls] = phonetics.reduce<
-		readonly [DictionaryWordResult["phonetics"][], URL[]]
+		readonly [DictionaryWordResult["phonetics"][], UrlString[]]
 	>(
 		(acc, { audio, text }) => {
 			if (audio) acc[1].push(audio);

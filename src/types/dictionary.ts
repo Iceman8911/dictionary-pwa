@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import type { DICTIONARY_API } from "~/shared/enums";
+import type { UrlString } from "./other";
 
 /** Main structure of parsed and stored data for each word */
 type DictionaryWordResult = Readonly<{
@@ -23,7 +24,7 @@ type DictionaryWordResult = Readonly<{
 		antonyms: string[];
 	};
 
-	audioUrl: URL | null;
+	audioUrl: UrlString | null;
 
 	frequency:
 		| "very common"
