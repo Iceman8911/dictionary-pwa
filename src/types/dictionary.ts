@@ -47,7 +47,9 @@ type DictionaryWordIndexeddbValue = {
 
 const IpaPhoneticSchema = v.pipe(
 	v.custom<DictionaryWordResult["phonetics"]>(
-		(input) => typeof input === "string" && /\/.*\//.test(input),
+		(input) =>
+			typeof input === "string" &&
+			(/\/.*\//.test(input) || /\[.*\]/.test(input)),
 	),
 );
 
