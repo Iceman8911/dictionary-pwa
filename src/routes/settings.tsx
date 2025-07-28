@@ -119,7 +119,7 @@ export default function Settings() {
 					min={10}
 					name="Cache Size"
 					onInput={(val) => setTempSettings({ cacheSize: val })}
-					tooltip="To prevent the cache from bloating up too much"
+					tooltip="To prevent the cache from bloating up too much, since each entry is ~2.6KB"
 					value={tempSettings.cacheSize}
 					valueString={`${tempSettings.cacheSize} entries`}
 				/>
