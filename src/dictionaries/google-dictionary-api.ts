@@ -186,7 +186,10 @@ function convertResponseToDictionaryResult(
 		originApi: GOOGLE_DICTIONARY_API,
 		partOfSpeech,
 		phonetics: getRandomElementInArray(ipaPhonetics) ?? "[]",
-		related: { antonyms, synonyms },
+		related: {
+			antonyms: [...new Set(antonyms)],
+			synonyms: [...new Set(synonyms)],
+		},
 	};
 }
 
