@@ -11,7 +11,7 @@ const DICTIONARY_API = {
 	/** https://www.datamuse.com/api */
 	DATAMUSE: "https://api.datamuse.com",
 
-	/** https://dictionaryapi.dev */
+	/** https://dictionaryapi.dev. Despite the name, it is **NOT** from google. */
 	GOOGLE_DICTIONARY_API: "https://api.dictionaryapi.dev",
 
 	/** https://freedictionaryapi.com */
