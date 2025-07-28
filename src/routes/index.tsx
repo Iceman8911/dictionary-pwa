@@ -201,7 +201,10 @@ function SearchedWordInfo(prop: {
 		);
 	}
 
-	function Examples(prop: { examples: DictionaryWordResult["examples"] }) {
+	function Examples(prop: {
+		examples: DictionaryWordResult["examples"];
+		word: string;
+	}) {
 		return (
 			<div>
 				<Show when={!!prop.examples.length && prop.examples}>
@@ -211,12 +214,28 @@ function SearchedWordInfo(prop: {
 
 							<ul class="mt-1">
 								<For each={examples()}>
-									{({ example, partOfSpeech }, index) => (
-										<li>
-											<span>{index()}.</span>{" "}
-											<span> {`(${partOfSpeech})`}</span> {example}
-										</li>
-									)}
+									{({ example, partOfSpeech }, index) => {
+										// Highlight the specific word in the example, but extracting it from the string and acdding the word manually
+										const splitExample = example.split(prop.word);
+
+										return (
+											<li>
+												<span>{index()}.</span>{" "}
+												<span> {`(${partOfSpeech})`}</span>{" "}
+												<For each={splitExample}>
+													{(fragment, index) => (
+														<>
+															{fragment}
+
+															<Show when={index() + 1 < splitExample.length}>
+																<span class="text-info">{prop.word}</span>
+															</Show>
+														</>
+													)}
+												</For>
+											</li>
+										);
+									}}
 								</For>
 							</ul>
 						</>
@@ -359,7 +378,7 @@ function SearchedWordInfo(prop: {
 
 						<Definitions definitions={val().definitions} />
 
-						<Examples examples={val().examples} />
+						<Examples examples={val().examples} word={val().name} />
 
 						<Frequency freq={val().frequency} />
 
