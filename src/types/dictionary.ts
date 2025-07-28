@@ -1,3 +1,4 @@
+import * as v from "valibot";
 import type { DICTIONARY_API } from "~/shared/enums";
 
 /** Main structure of parsed and stored data for each word */
@@ -54,9 +55,16 @@ type DictionaryWordIndexeddbValue = {
 	data: DictionaryWordResult;
 };
 
-export type {
-	DictionaryWordResult,
-	PartOfSpeech,
-	DictionaryWordIndexeddbKey,
-	DictionaryWordIndexeddbValue,
+const IpaPhoneticSchema = v.pipe(
+	v.custom<DictionaryWordResult["phonetics"]>(
+		(input) => typeof input === "string" && /\/.*\//.test(input),
+	),
+);
+
+export {
+	type DictionaryWordResult,
+	type PartOfSpeech,
+	type DictionaryWordIndexeddbKey,
+	type DictionaryWordIndexeddbValue,
+	IpaPhoneticSchema,
 };

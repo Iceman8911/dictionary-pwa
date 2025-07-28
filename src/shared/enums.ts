@@ -12,7 +12,7 @@ const DICTIONARY_API = {
 	DATAMUSE: "https://api.datamuse.com",
 
 	/** https://dictionaryapi.dev */
-	DICTIONARY_API: "dictApi",
+	GOOGLE_DICTIONARY_API: "https://api.dictionaryapi.dev",
 
 	/** https://freedictionaryapi.com */
 	FREE_DICTIONARY: "freeDictApi",

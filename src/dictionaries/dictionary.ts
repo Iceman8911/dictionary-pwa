@@ -8,6 +8,7 @@ import type {
 import * as idb from "~/utils/idb";
 import { gIsUserConnectedToInternet } from "~/utils/internet";
 import { searchForWordDefinitionAndSynonyms } from "./datamuse";
+import { queryWordForDictionaryResult } from "./google-dictionary-api";
 
 /** Attempts to get the dictionary results of a particular word.
  *
@@ -42,7 +43,11 @@ async function fetchFromApi(
 	word: string,
 	maxResults: number,
 ): Promise<DictionaryWordResult | null> {
-	const { DATAMUSE, DICTIONARY_API, FREE_DICTIONARY } = DictionaryApis;
+	const {
+		DATAMUSE,
+		GOOGLE_DICTIONARY_API: DICTIONARY_API,
+		FREE_DICTIONARY,
+	} = DictionaryApis;
 
 	const cacheKey: DictionaryWordIndexeddbKey = `${api}-${word}`;
 
@@ -69,7 +74,7 @@ async function fetchFromApi(
 		}
 
 		case DICTIONARY_API: {
-			fetchedData = null;
+			fetchedData = await queryWordForDictionaryResult(word);
 
 			break;
 		}
@@ -172,7 +177,11 @@ async function cleanupExpiredCachedEntriesWhenAboveSizeLimit() {
 }
 
 function getNameOfDictionaryApi(api: DictionaryApis) {
-	const { DATAMUSE, DICTIONARY_API, FREE_DICTIONARY } = DictionaryApis;
+	const {
+		DATAMUSE,
+		GOOGLE_DICTIONARY_API: DICTIONARY_API,
+		FREE_DICTIONARY,
+	} = DictionaryApis;
 
 	switch (api) {
 		case DATAMUSE:
