@@ -283,18 +283,28 @@ function SearchedWordInfo(prop: {
 		);
 	}
 
+	/** The default dictionary result source freshly fetched from the api */
 	const apiResultSourceFromSearchResults = () =>
 		[...prop.searchResult.keys()][0] ?? null;
 
+	/** The dictionary result source that the user explicitly chooses by clicking on */
 	const [apiResultSourceFromUserChoice, setApiResultFromUserChoice] =
 		createSignal<DICTIONARY_API | null>(null);
 
+	/** The dictionary result source to actually use, with priority given to the user's choice */
 	const apiResultSourceToView = createMemo(
 		() => apiResultSourceFromUserChoice() ?? apiResultSourceFromSearchResults(),
 	);
 
-	const apiResultToView = createMemo(() =>
-		prop.searchResult.get(apiResultSourceToView() ?? DICTIONARY_API.DATAMUSE),
+	/** Actual data to use for displaying with a backup incase of edge cases */
+	const apiResultToView = createMemo(
+		() =>
+			prop.searchResult.get(
+				apiResultSourceToView() ?? DICTIONARY_API.DATAMUSE,
+			) ??
+			prop.searchResult.get(
+				apiResultSourceFromSearchResults() ?? DICTIONARY_API.DATAMUSE,
+			),
 	);
 
 	return (
