@@ -35,7 +35,8 @@ export default defineConfig({
 							options: {
 								cacheName: "datamuse-api-calls",
 								expiration: {
-									maxEntries: 150,
+									// On average, there will be 3 suggestion api calls per word, and this should cache up to a 100 word suggestions, give or take
+									maxEntries: 310,
 									maxAgeSeconds: 60 * 60,
 								},
 								cacheableResponse: {
