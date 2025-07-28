@@ -44,6 +44,29 @@ export default defineConfig({
 								},
 							},
 						},
+						{
+							handler: "StaleWhileRevalidate",
+
+							urlPattern: ({ url: { pathname } }) => pathname.endsWith("mp3"),
+
+							options: {
+								cacheName: "audio-pronounciations",
+
+								expiration: {
+									/** On average, each audio will be ~15KB and I don't wish to go too far beyond ~1MB */
+									maxEntries: 70,
+
+									/** One week */
+									maxAgeSeconds: 60 * 60 * 24 * 7,
+
+									purgeOnQuotaError: true,
+								},
+
+								cacheableResponse: {
+									statuses: [0, 200],
+								},
+							},
+						},
 					],
 				},
 

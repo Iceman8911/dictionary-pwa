@@ -262,10 +262,15 @@ function SearchedWordInfo(prop: {
 			<Show when={prop.url}>
 				{(audioUrl) => (
 					<div>
-						<span>Audio Url:</span>{" "}
-						<a class="link link-info break-words" href={audioUrl().toString()}>
-							{audioUrl().toString()}
-						</a>
+						<span>Audio:</span>{" "}
+						<audio
+							class="inline-block"
+							controls
+							preload="none"
+							src={audioUrl()}
+						>
+							<track kind="captions"></track>
+						</audio>
 					</div>
 				)}
 			</Show>
