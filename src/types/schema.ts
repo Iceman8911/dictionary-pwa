@@ -4,4 +4,6 @@ const UrlString = v.pipe(v.string(), v.url(), v.brand("url"));
 
 type UrlString = v.InferOutput<typeof UrlString>;
 
-export { UrlString };
+const StringArraySchema = v.array(v.string());
+
+export { UrlString, StringArraySchema };

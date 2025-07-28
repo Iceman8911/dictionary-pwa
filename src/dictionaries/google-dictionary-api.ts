@@ -5,12 +5,10 @@ import {
 	IpaPhoneticSchema,
 	type PartOfSpeech,
 } from "~/types/dictionary";
-import { UrlString } from "~/types/other";
+import { StringArraySchema, UrlString } from "~/types/schema";
 import { getRandomElementInArray } from "~/utils/other";
 
 const { GOOGLE_DICTIONARY_API } = DICTIONARY_API;
-
-const StringArraySchema = v.array(v.string());
 
 const LicenseSchema = v.object({
 	/** License name: `BY-SA 3.0` */
