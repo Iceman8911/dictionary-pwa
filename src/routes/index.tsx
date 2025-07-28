@@ -244,7 +244,9 @@ function SearchedWordInfo(prop: {
 				{(audioUrl) => (
 					<div>
 						<span>Audio Url:</span>{" "}
-						<a href={audioUrl().toString()}>{audioUrl().toString()}</a>
+						<a class="link link-info" href={audioUrl().toString()}>
+							{audioUrl().toString()}
+						</a>
 					</div>
 				)}
 			</Show>
@@ -316,7 +318,7 @@ function SearchedWordInfo(prop: {
 											{(res) => (
 												<button
 													type="button"
-													class="text-primary"
+													class="link link-primary"
 													onClick={(_) =>
 														setApiResultFromUserChoice(res().originApi)
 													}
