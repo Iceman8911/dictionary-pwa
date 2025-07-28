@@ -2,6 +2,7 @@ import { trackStore } from "@solid-primitives/deep";
 import InfoIcon from "lucide-solid/icons/info";
 import { createEffect, For, on } from "solid-js";
 import { createStore, produce, type StoreSetter, unwrap } from "solid-js/store";
+import { getNameOfDictionaryApi } from "~/dictionaries/dictionary";
 import { DICTIONARY_API } from "~/shared/enums";
 import { gDefaultSettings, gSetSettings, gSettings } from "~/shared/store";
 import type { GlobalSettings } from "~/types/store";
@@ -36,8 +37,8 @@ export default function Settings() {
 				<legend class="fieldset-legend">Dictionaries To Use</legend>
 
 				<div class="grid gap-2 col-gap-4 grid-cols-1 md:grid-cols-2 size-fit">
-					<For each={Object.entries(DICTIONARY_API)}>
-						{([key, val]) => (
+					<For each={Object.values(DICTIONARY_API)}>
+						{(val) => (
 							<label class="label text-base-content">
 								<input
 									type="checkbox"
@@ -56,7 +57,7 @@ export default function Settings() {
 									}}
 									class="checkbox"
 								/>
-								{key}{" "}
+								{getNameOfDictionaryApi(val)}{" "}
 								<a href={val} class="link link-ghost">
 									({val})
 								</a>
