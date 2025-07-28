@@ -88,7 +88,13 @@ async function fetchResponse(word: string): Promise<ResponseOutput | []> {
 		const fetchedData = await (await fetch(`${DEFINITION_URL}/${word}`)).json();
 
 		return v.parse(ResponseSchema, fetchedData);
-	} catch {
+	} catch (e) {
+		console.warn(
+			"Error when searching for '",
+			word,
+			"' with Google Dictionary Api: ",
+			e,
+		);
 		return [];
 	}
 }
