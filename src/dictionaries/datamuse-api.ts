@@ -56,12 +56,8 @@ const SuggestionResponseSchema = v.pipe(
 	v.readonly(),
 );
 
-type SuggestionResponseOutput = v.InferOutput<typeof SuggestionResponseSchema>;
-
 const getSearchSuggestions = query(
-	async (
-		payload: SuggestionPayloadInput,
-	): Promise<SuggestionResponseOutput> => {
+	async (payload: SuggestionPayloadInput): Promise<ReadonlyArray<string>> => {
 		try {
 			const { word: hint, maxResults } = v.parse(
 				SuggestionPayloadSchema,
@@ -79,7 +75,7 @@ const getSearchSuggestions = query(
 				ABORT_EARLY_CONFIG,
 			);
 
-			return parsedResult;
+			return parsedResult.map(({ word }) => word);
 		} catch {
 			return [];
 		}

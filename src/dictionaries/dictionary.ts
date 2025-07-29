@@ -7,7 +7,10 @@ import type {
 } from "~/types/dictionary";
 import * as idb from "~/utils/idb";
 import { gIsUserConnectedToInternet } from "~/utils/internet";
-import { queryWordForDictionaryResult as queryWordForDictionaryResultFromDatamuseApi } from "./datamuse-api";
+import {
+	getSearchSuggestions as getSearchSuggestionsFromDatamuseApi,
+	queryWordForDictionaryResult as queryWordForDictionaryResultFromDatamuseApi,
+} from "./datamuse-api";
 import { queryWordForDictionaryResult as queryWordForDictionaryResultFromFreeDictionaryApi } from "./free-dictionary-api";
 import { queryWordForDictionaryResult as queryWordForDictionaryResultFromGoogleDictionaryApi } from "./google-dictionary-api";
 import { queryWordForDictionaryResult as queryWordForDictionaryResultFromUrbanDictionaryApi } from "./urban-dictionary-api";
@@ -210,8 +213,29 @@ function getNameOfDictionaryApi(api: DictionaryApis) {
 	}
 }
 
+async function getSearchSuggestions(
+	input: string,
+): Promise<ReadonlyArray<string>> {
+	const suggestionArrayPromises: Array<Promise<ReadonlyArray<string>>> = [];
+
+	suggestionArrayPromises.push(
+		getSearchSuggestionsFromDatamuseApi({ word: input }),
+	);
+
+	const fulfilledSuggestionArray = (
+		await Promise.allSettled(suggestionArrayPromises)
+	).reduce<string[]>((acc, val) => {
+		if (val.status === "fulfilled") acc.push(...val.value);
+
+		return acc;
+	}, []);
+
+	return fulfilledSuggestionArray;
+}
+
 export {
 	fetchDictionaryResult,
 	cleanupExpiredCachedEntriesWhenAboveSizeLimit,
 	getNameOfDictionaryApi,
+	getSearchSuggestions,
 };

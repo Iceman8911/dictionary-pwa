@@ -11,10 +11,10 @@ import {
 } from "solid-js";
 import LoadingSpinner from "~/components/loading-spinner";
 import Placeholder from "~/components/placeholder";
-import { getSearchSuggestions } from "~/dictionaries/datamuse-api";
 import {
 	fetchDictionaryResult,
 	getNameOfDictionaryApi,
+	getSearchSuggestions,
 } from "~/dictionaries/dictionary";
 import { DICTIONARY_API } from "~/shared/enums";
 import { gSettings } from "~/shared/store";
@@ -92,7 +92,7 @@ function SearchBar(prop: {
 
 	const suggestions = createAsync(() => {
 		if (prop.searchInput.length > 2)
-			return getSearchSuggestions({ word: prop.searchInput });
+			return getSearchSuggestions(prop.searchInput);
 
 		return Promise.resolve([]);
 	});
@@ -124,7 +124,7 @@ function SearchBar(prop: {
 			<datalist id={DATALIST_ID}>
 				<Suspense fallback={<Placeholder />}>
 					<For each={suggestions.latest} fallback={<Placeholder />}>
-						{({ word }) => <option value={word}></option>}
+						{(word) => <option value={word}></option>}
 					</For>
 				</Suspense>
 			</datalist>
