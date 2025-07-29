@@ -85,10 +85,13 @@ const ResponseSchema = v.object({
 
 type ResponseOutput = v.InferOutput<typeof ResponseSchema>;
 
-async function fetchResponse(word: string): Promise<ResponseOutput | null> {
+async function fetchResponse(
+	word: string,
+	maxResults: number,
+): Promise<ResponseOutput | null> {
 	try {
 		const URL =
-			`${URBAN_DICTIONARY}/api/search?term=${word}&limit=100&` as const;
+			`${URBAN_DICTIONARY}/api/search?term=${word}&limit=${maxResults}&` as const;
 
 		const fetchedData = await (await fetch(URL)).json();
 
@@ -142,8 +145,11 @@ function convertResponseToDictionaryResult(
 
 async function queryWordForDictionaryResult(
 	word: string,
+	maxResults: number,
 ): Promise<DictionaryWordResult | null> {
-	return convertResponseToDictionaryResult(await fetchResponse(word));
+	return convertResponseToDictionaryResult(
+		await fetchResponse(word, maxResults),
+	);
 }
 
 export { queryWordForDictionaryResult };

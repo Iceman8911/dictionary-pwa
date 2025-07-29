@@ -89,8 +89,10 @@ async function fetchFromApi(
 		}
 
 		case URBAN_DICTIONARY: {
-			fetchedData =
-				await queryWordForDictionaryResultFromUrbanDictionaryApi(word);
+			fetchedData = await queryWordForDictionaryResultFromUrbanDictionaryApi(
+				word,
+				maxResults,
+			);
 
 			break;
 		}
