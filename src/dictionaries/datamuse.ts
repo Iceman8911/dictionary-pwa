@@ -331,7 +331,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 	return null;
 }
 
-async function searchForWordDefinitionAndSynonyms(
+async function queryWordForDictionaryResult(
 	payload: WordSearchPayloadInput,
 ): Promise<DictionaryWordResult | null> {
 	try {
@@ -394,4 +394,4 @@ async function searchForWordDefinitionAndSynonyms(
 	return null;
 }
 
-export { getSearchSuggestions, searchForWordDefinitionAndSynonyms };
+export { getSearchSuggestions, queryWordForDictionaryResult };

@@ -7,7 +7,7 @@ import type {
 } from "~/types/dictionary";
 import * as idb from "~/utils/idb";
 import { gIsUserConnectedToInternet } from "~/utils/internet";
-import { searchForWordDefinitionAndSynonyms } from "./datamuse";
+import { queryWordForDictionaryResult as queryWordForDictionaryResultFromDatamuseApi } from "./datamuse";
 import { queryWordForDictionaryResult as queryWordForDictionaryResultFromFreeDictionaryApi } from "./free-dictionary-api";
 import { queryWordForDictionaryResult as queryWordForDictionaryResultFromGoogleDictionaryApi } from "./google-dictionary-api";
 
@@ -66,7 +66,7 @@ async function fetchFromApi(
 
 	switch (api) {
 		case DATAMUSE: {
-			fetchedData = await searchForWordDefinitionAndSynonyms({
+			fetchedData = await queryWordForDictionaryResultFromDatamuseApi({
 				word,
 				maxResults,
 			});
