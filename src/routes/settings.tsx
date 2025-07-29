@@ -58,7 +58,11 @@ export default function Settings() {
 									class="checkbox"
 								/>
 								{getNameOfDictionaryApi(val)}{" "}
-								<a href={val} class="link link-ghost">
+								<a
+									href={val}
+									target="_blank"
+									class="link link-ghost overflow-hidden text-ellipsis"
+								>
 									({val})
 								</a>
 							</label>
