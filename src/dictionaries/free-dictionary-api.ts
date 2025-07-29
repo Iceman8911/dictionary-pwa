@@ -82,8 +82,11 @@ const ResponseSchema = v.object({
 			/** Information about a language */
 			language: LanguageSchema,
 
-			/** What type of word this is (noun, verb, adjective, etc.) */
-			partOfSpeech: PartOfSpeech,
+			/** What type of word this is (noun, verb, adjective, etc.).
+			 *
+			 * For some reason, this may also return as `"name"`. In such cases, it defaults to `"noun"`.
+			 */
+			partOfSpeech: v.fallback(PartOfSpeech, "noun"),
 
 			/** How to pronounce a word using phonetic symbols */
 			pronunciations: v.array(
