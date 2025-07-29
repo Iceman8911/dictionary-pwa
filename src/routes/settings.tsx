@@ -62,7 +62,7 @@ export default function Settings() {
 								<Switch>
 									<Match when={val === URBAN_DICTIONARY}>
 										<span
-											class="tooltip tooltip-right lg:tooltip-top"
+											class="tooltip tooltip-right"
 											data-tip="Enabling this may slow down the search"
 										>
 											<InfoIcon class="size-4" />
@@ -71,7 +71,7 @@ export default function Settings() {
 
 									<Match when={val === DATAMUSE}>
 										<span
-											class="tooltip tooltip-right lg:tooltip-top"
+											class="tooltip tooltip-right"
 											data-tip="Also provides suggestions"
 										>
 											<InfoIcon class="size-4" />
