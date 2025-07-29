@@ -1,6 +1,6 @@
 import { trackStore } from "@solid-primitives/deep";
 import InfoIcon from "lucide-solid/icons/info";
-import { createEffect, For, on } from "solid-js";
+import { createEffect, For, on, Show } from "solid-js";
 import { createStore, produce, type StoreSetter, unwrap } from "solid-js/store";
 import { getNameOfDictionaryApi } from "~/dictionaries/dictionary";
 import { DICTIONARY_API } from "~/shared/enums";
@@ -57,6 +57,14 @@ export default function Settings() {
 									}}
 									class="checkbox"
 								/>
+								<Show when={val === DICTIONARY_API.URBAN_DICTIONARY}>
+									<span
+										class="tooltip tooltip-right lg:tooltip-top"
+										data-tip="Enabling this may slow down the search"
+									>
+										<InfoIcon class="size-4" />
+									</span>
+								</Show>
 								{getNameOfDictionaryApi(val)}{" "}
 								<a
 									href={val}
