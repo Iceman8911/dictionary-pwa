@@ -168,15 +168,17 @@ async function cleanupExpiredCachedEntriesWhenAboveSizeLimit() {
 		cacheKeys,
 		gSettings.cleanup.batchSize,
 	)) {
+		const keysToDelete: DictionaryWordIndexeddbKey[] = [];
+
 		batch.forEach((val) => {
 			const key = getCacheKeyFromDictionaryResult(val.data);
 
-			if (isCachedEntryExpired(val))
-				// We can afford to not `await` this
-				idb.del(key);
+			if (isCachedEntryExpired(val)) keysToDelete.push(key);
 
 			// REVIEW: Should non-expired entries be deleted if we're still above the size limit?
 		});
+
+		await idb.del(...keysToDelete);
 	}
 }
 
