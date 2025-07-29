@@ -1,11 +1,7 @@
 import * as v from "valibot";
 import { DICTIONARY_API } from "~/shared/enums";
-import {
-	type DictionaryWordResult,
-	IpaPhoneticSchema,
-} from "~/types/dictionary";
+import { type DictionaryWordResult, IpaPhonetic } from "~/types/dictionary";
 import { PartOfSpeech, StringArraySchema, UrlString } from "~/types/schema";
-import { getRandomElementInArray } from "~/utils/other";
 
 const { FREE_DICTIONARY } = DICTIONARY_API;
 
@@ -97,7 +93,7 @@ const ResponseSchema = v.object({
 						type: v.literal("ipa"),
 
 						/** The pronunciation written in the specified notation */
-						text: IpaPhoneticSchema,
+						text: IpaPhonetic,
 
 						/** Labels describing this pronunciation (like dialect or formality level) e.g "General American", "UK", "Ireland", "Northern England" */
 						tags: StringArraySchema,
@@ -190,7 +186,7 @@ function convertResponseToDictionaryResult(
 	] = entries.reduce<
 		[
 			PartOfSpeech[],
-			DictionaryWordResult["phonetics"][],
+			DictionaryWordResult["phonetics"],
 			DictionaryWordResult["definitions"],
 			DictionaryWordResult["examples"],
 			DictionaryWordResult["related"]["synonyms"],
@@ -201,7 +197,7 @@ function convertResponseToDictionaryResult(
 			acc[0].push(partOfSpeech);
 
 			acc[1].push(
-				...pronunciations.reduce<DictionaryWordResult["phonetics"][]>(
+				...pronunciations.reduce<DictionaryWordResult["phonetics"]>(
 					(acc, val) => {
 						if (val.type === "ipa") {
 							acc.push(val.text);
@@ -302,7 +298,7 @@ function convertResponseToDictionaryResult(
 		name: word,
 		originApi: FREE_DICTIONARY,
 		partsOfSpeech: [...new Set(partsOfSpeech)],
-		phonetics: getRandomElementInArray(ipaPhonetics) ?? "[]",
+		phonetics: [...new Set(ipaPhonetics)],
 		related: { antonyms, synonyms },
 	};
 }

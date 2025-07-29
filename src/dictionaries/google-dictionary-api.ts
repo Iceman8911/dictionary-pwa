@@ -1,9 +1,6 @@
 import * as v from "valibot";
 import { DICTIONARY_API } from "~/shared/enums";
-import {
-	type DictionaryWordResult,
-	IpaPhoneticSchema,
-} from "~/types/dictionary";
+import { type DictionaryWordResult, IpaPhonetic } from "~/types/dictionary";
 import { PartOfSpeech, StringArraySchema, UrlString } from "~/types/schema";
 import { getRandomElementInArray } from "~/utils/other";
 
@@ -25,7 +22,7 @@ const ResponseSchema = v.pipe(
 				word: v.string(),
 
 				/** Generic IPA pronounciation */
-				phonetic: v.optional(IpaPhoneticSchema),
+				phonetic: v.optional(IpaPhonetic),
 
 				phonetics: v.array(
 					v.object({
@@ -39,7 +36,7 @@ const ResponseSchema = v.pipe(
 						license: v.optional(LicenseSchema),
 
 						/** IPA pronounciation */
-						text: v.optional(IpaPhoneticSchema),
+						text: v.optional(IpaPhonetic),
 					}),
 				),
 
@@ -107,7 +104,7 @@ function convertResponseToDictionaryResult(
 	const { meanings, phonetic, phonetics, word } = response[0];
 
 	const [ipaPhonetics, audioUrls] = phonetics.reduce<
-		readonly [DictionaryWordResult["phonetics"][], UrlString[]]
+		readonly [DictionaryWordResult["phonetics"], UrlString[]]
 	>(
 		(acc, { audio, text }) => {
 			if (audio) acc[1].push(audio);
@@ -186,7 +183,7 @@ function convertResponseToDictionaryResult(
 		name: word,
 		originApi: GOOGLE_DICTIONARY_API,
 		partsOfSpeech: [...new Set(partOfSpeech)],
-		phonetics: getRandomElementInArray(ipaPhonetics) ?? "[]",
+		phonetics: [...new Set(ipaPhonetics)],
 		related: {
 			antonyms: [...new Set(antonyms)],
 			synonyms: [...new Set(synonyms)],

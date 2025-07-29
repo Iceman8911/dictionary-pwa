@@ -238,7 +238,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 
 		let frequencyValue: number = 0;
 
-		let phonetics: DictionaryWordResult["phonetics"] = "[]";
+		let phonetics: DictionaryWordResult["phonetics"] = [];
 
 		for (const tag of tags) {
 			const possiblePartOfSpeech = v.safeParse(
@@ -259,7 +259,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 					}
 
 					case "ipa_pron": {
-						phonetics = `[${tagValue}]`;
+						phonetics = [`[${tagValue}]`];
 						break;
 					}
 

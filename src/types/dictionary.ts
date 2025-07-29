@@ -9,7 +9,7 @@ type DictionaryWordResult = Readonly<{
 	name: string;
 
 	/** IPA phonetics */
-	phonetics: `/${string}/` | `[${string}]`;
+	phonetics: Array<IpaPhonetic>;
 
 	partsOfSpeech: NullishPartOfSpeech[];
 
@@ -45,17 +45,19 @@ type DictionaryWordIndexeddbValue = {
 	data: DictionaryWordResult;
 };
 
-const IpaPhoneticSchema = v.pipe(
-	v.custom<DictionaryWordResult["phonetics"]>(
+const IpaPhonetic = v.pipe(
+	v.custom<`/${string}/` | `[${string}]`>(
 		(input) =>
 			typeof input === "string" &&
 			(/\/.*\//.test(input) || /\[.*\]/.test(input)),
 	),
 );
 
+type IpaPhonetic = v.InferOutput<typeof IpaPhonetic>;
+
 export {
 	type DictionaryWordResult,
 	type DictionaryWordIndexeddbKey,
 	type DictionaryWordIndexeddbValue,
-	IpaPhoneticSchema,
+	IpaPhonetic,
 };

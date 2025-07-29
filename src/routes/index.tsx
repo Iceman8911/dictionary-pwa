@@ -385,7 +385,21 @@ function SearchedWordInfo(prop: {
 						</div>
 
 						<div>
-							<span>IPA Phonetics:</span> {val().phonetics}
+							<span>IPA Phonetics:</span>{" "}
+							<For each={val().phonetics}>
+								{(phonetic, index) => (
+									<>
+										{phonetic}
+
+										<Show
+											when={index() + 1 < val().phonetics.length}
+											fallback={"."}
+										>
+											{", "}
+										</Show>
+									</>
+								)}
+							</For>
 						</div>
 
 						<Audio url={val().audioUrl} />
