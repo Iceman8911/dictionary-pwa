@@ -11,7 +11,7 @@ import {
 } from "solid-js";
 import LoadingSpinner from "~/components/loading-spinner";
 import Placeholder from "~/components/placeholder";
-import { getSearchSuggestions } from "~/dictionaries/datamuse";
+import { getSearchSuggestions } from "~/dictionaries/datamuse-api";
 import {
 	fetchDictionaryResult,
 	getNameOfDictionaryApi,
