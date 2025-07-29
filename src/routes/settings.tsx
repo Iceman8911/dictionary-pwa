@@ -1,7 +1,7 @@
 import { trackStore } from "@solid-primitives/deep";
-import InfoIcon from "lucide-solid/icons/info";
-import { createEffect, For, Match, on, Show, Switch } from "solid-js";
+import { createEffect, For, Match, on, Switch } from "solid-js";
 import { createStore, produce, type StoreSetter, unwrap } from "solid-js/store";
+import Tooltip from "~/components/tooltip";
 import { getNameOfDictionaryApi } from "~/dictionaries/dictionary";
 import { DICTIONARY_API } from "~/shared/enums";
 import { gDefaultSettings, gSetSettings, gSettings } from "~/shared/store";
@@ -61,21 +61,19 @@ export default function Settings() {
 								/>
 								<Switch>
 									<Match when={val === URBAN_DICTIONARY}>
-										<span
-											class="tooltip tooltip-right"
-											data-tip="Enabling this may slow down the search"
-										>
-											<InfoIcon class="size-4" />
-										</span>
+										<Tooltip
+											info="Enabling this may slow down the search"
+											class="size-4"
+											dir="right"
+										/>
 									</Match>
 
 									<Match when={val === DATAMUSE}>
-										<span
-											class="tooltip tooltip-right"
-											data-tip="Also provides suggestions"
-										>
-											<InfoIcon class="size-4" />
-										</span>
+										<Tooltip
+											info="Also provides suggestions"
+											class="size-4"
+											dir="right"
+										/>
 									</Match>
 								</Switch>
 								{getNameOfDictionaryApi(val)}{" "}
@@ -109,9 +107,7 @@ export default function Settings() {
 					<p class="label text-base-content">
 						{prop.name}:{" "}
 						<span class="text-primary">{prop.valueString ?? prop.value}</span>{" "}
-						<span class="tooltip" data-tip={prop.tooltip}>
-							<InfoIcon class="size-4" />
-						</span>
+						<Tooltip info={prop.tooltip} class="size-4" />
 					</p>
 
 					<input
