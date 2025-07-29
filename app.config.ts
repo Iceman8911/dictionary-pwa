@@ -30,7 +30,10 @@ export default defineConfig({
 					runtimeCaching: [
 						{
 							urlPattern: ({ url: { origin, pathname } }) =>
-								origin === "https://api.datamuse.com" && pathname === "/sug",
+								(origin === "https://api.datamuse.com" &&
+									pathname === "/sug") ||
+								(origin === "https://api.urbandictionary.com" &&
+									pathname === "/v0/autocomplete-extra"),
 
 							handler: "StaleWhileRevalidate",
 

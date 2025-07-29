@@ -152,4 +152,33 @@ async function queryWordForDictionaryResult(
 	);
 }
 
-export { queryWordForDictionaryResult };
+const SearchSuggestionSchema = v.looseObject({
+	results: v.array(
+		v.object({
+			/** Definition for <SUGGESTED_WORD> */
+			preview: v.string(),
+
+			/** <SUGGESTED_WORD>. What you actualy want */
+			term: v.string(),
+		}),
+	),
+});
+
+async function getSearchSuggestions(
+	word: string,
+): Promise<ReadonlyArray<string>> {
+	try {
+		const ENDPOINT =
+			`https://api.urbandictionary.com/v0/autocomplete-extra?term=${word}` as const;
+
+		const fetchedData = await (await fetch(ENDPOINT)).json();
+
+		const parsedData = v.parse(SearchSuggestionSchema, fetchedData);
+
+		return parsedData.results.map(({ term }) => term);
+	} catch {
+		return [];
+	}
+}
+
+export { queryWordForDictionaryResult, getSearchSuggestions };

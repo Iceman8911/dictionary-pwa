@@ -34,6 +34,8 @@ export default function Settings() {
 	function SelectedDictionaryApis() {
 		const { DATAMUSE, URBAN_DICTIONARY } = DICTIONARY_API;
 
+		const alsoProvidesSuggestionsText = "Also provides suggestions" as const;
+
 		return (
 			<fieldset class="fieldset bg-base-200 border-base-300 rounded-box size-fit border p-4">
 				<legend class="fieldset-legend">Dictionaries To Use</legend>
@@ -62,7 +64,7 @@ export default function Settings() {
 								<Switch>
 									<Match when={val === URBAN_DICTIONARY}>
 										<Tooltip
-											info="Enabling this may slow down the search"
+											info={`Enabling this may slow down the search. ${alsoProvidesSuggestionsText}`}
 											class="size-4"
 											dir="right"
 										/>
@@ -70,7 +72,7 @@ export default function Settings() {
 
 									<Match when={val === DATAMUSE}>
 										<Tooltip
-											info="Also provides suggestions"
+											info={alsoProvidesSuggestionsText}
 											class="size-4"
 											dir="right"
 										/>

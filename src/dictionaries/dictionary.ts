@@ -13,7 +13,10 @@ import {
 } from "./datamuse-api";
 import { queryWordForDictionaryResult as queryWordForDictionaryResultFromFreeDictionaryApi } from "./free-dictionary-api";
 import { queryWordForDictionaryResult as queryWordForDictionaryResultFromGoogleDictionaryApi } from "./google-dictionary-api";
-import { queryWordForDictionaryResult as queryWordForDictionaryResultFromUrbanDictionaryApi } from "./urban-dictionary-api";
+import {
+	getSearchSuggestions as getSearchSuggestionsFromUrbanDictionaryApi,
+	queryWordForDictionaryResult as queryWordForDictionaryResultFromUrbanDictionaryApi,
+} from "./urban-dictionary-api";
 
 const { DATAMUSE, GOOGLE_DICTIONARY_API, FREE_DICTIONARY, URBAN_DICTIONARY } =
 	DictionaryApis;
@@ -223,6 +226,11 @@ async function getSearchSuggestions(
 			getSearchSuggestionsFromDatamuseApi({ word: input }),
 		);
 
+	if (gSettings.dictionaries.has(URBAN_DICTIONARY))
+		suggestionArrayPromises.push(
+			getSearchSuggestionsFromUrbanDictionaryApi(input),
+		);
+
 	const fulfilledSuggestionArray = (
 		await Promise.allSettled(suggestionArrayPromises)
 	).reduce<string[]>((acc, val) => {
@@ -231,7 +239,9 @@ async function getSearchSuggestions(
 		return acc;
 	}, []);
 
-	return fulfilledSuggestionArray;
+	return [
+		...new Set(fulfilledSuggestionArray.map((val) => val.toLocaleLowerCase())),
+	];
 }
 
 export {
