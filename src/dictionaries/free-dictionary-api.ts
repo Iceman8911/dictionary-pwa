@@ -301,7 +301,7 @@ function convertResponseToDictionaryResult(
 		frequency: null,
 		name: word,
 		originApi: FREE_DICTIONARY,
-		partOfSpeech: partsOfSpeech,
+		partOfSpeech: [...new Set(partsOfSpeech)],
 		phonetics: getRandomElementInArray(ipaPhonetics) ?? "[]",
 		related: { antonyms, synonyms },
 	};
