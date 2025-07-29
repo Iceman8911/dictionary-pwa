@@ -29,6 +29,7 @@ export default function Home() {
 
 	const [searchInput, setSearchInput] = createSignal("");
 
+	/** Wrapper for searching through all available apis so I won't repeat myself */
 	const searchWord = async (word: string) => {
 		setSearchResults(
 			(
