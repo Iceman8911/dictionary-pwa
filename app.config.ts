@@ -10,9 +10,9 @@ export default defineConfig({
 			VitePWA({
 				registerType: "prompt",
 
-				devOptions: {
-					enabled: true,
-				},
+				// devOptions: {
+				// 	enabled: true,
+				// },
 
 				scope: "/",
 
