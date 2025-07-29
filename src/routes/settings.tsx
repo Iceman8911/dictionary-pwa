@@ -118,7 +118,7 @@ export default function Settings() {
 				<legend class="fieldset-legend">Cache Settings</legend>
 
 				<_InputAndRange
-					max={1000 * 60 * 60 * 24}
+					max={1000 * 60 * 60 * 24 * 7}
 					min={1000}
 					name="Cache Duration"
 					onInput={(val) => setTempSettings({ cacheDuration: val })}
