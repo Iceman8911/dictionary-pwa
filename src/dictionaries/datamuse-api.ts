@@ -2,8 +2,9 @@ import { query } from "@solidjs/router";
 import * as v from "valibot";
 import { DICTIONARY_API, QUERY_NAME } from "~/shared/enums";
 import { ABORT_EARLY_CONFIG } from "~/shared/valibot";
-import type { DictionaryWordResult, PartOfSpeech } from "~/types/dictionary";
-import { gIsUserConnectedToInternet } from "~/utils/internet";
+import type { DictionaryWordResult } from "~/types/dictionary";
+
+type PartOfSpeech = DictionaryWordResult["partsOfSpeech"][0];
 
 const { DATAMUSE: DATAMUSE_BASE_URL } = DICTIONARY_API;
 
@@ -129,7 +130,7 @@ const WordSearchResponseSchema = v.pipe(
 				word: v.string(),
 
 				/** Ranking of the word in relation to the others in the array */
-				score: v.number(),
+				score: v.optional(v.number()),
 
 				/** Definitions for th word */
 				defs: v.optional(
@@ -184,7 +185,9 @@ function convertWordSearchResponseOutputToDictionarySchema(
 
 		if (frequency > 40) return "uncommon";
 
-		return "rare";
+		if (frequency > 10) return "rare";
+
+		return "very rare";
 	}
 
 	/** To turn it to more consistent values */
@@ -235,7 +238,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 
 		let frequencyValue: number = 0;
 
-		let phonetics: DictionaryWordResult["phonetics"] = "[]";
+		let phonetics: DictionaryWordResult["phonetics"] = [];
 
 		for (const tag of tags) {
 			const possiblePartOfSpeech = v.safeParse(
@@ -256,7 +259,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 					}
 
 					case "ipa_pron": {
-						phonetics = `[${tagValue}]`;
+						phonetics = [`[${tagValue}]`];
 						break;
 					}
 
@@ -291,7 +294,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 		);
 
 		const mainDictionaryResult: DictionaryWordResult = {
-			audioUrl: null,
+			audioUrls: [],
 			definitions: mainWordsResponse.defs.map((val) =>
 				extractPartOfSpeechFromDefinition(val),
 			),
@@ -299,7 +302,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 			frequency,
 			name: mainWordsResponse.word,
 			originApi: DATAMUSE_BASE_URL,
-			partOfSpeech,
+			partsOfSpeech: partOfSpeech,
 			phonetics,
 			related: { antonyms: [], synonyms: [] },
 		};
@@ -328,7 +331,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 	return null;
 }
 
-async function searchForWordDefinitionAndSynonyms(
+async function queryWordForDictionaryResult(
 	payload: WordSearchPayloadInput,
 ): Promise<DictionaryWordResult | null> {
 	try {
@@ -379,9 +382,16 @@ async function searchForWordDefinitionAndSynonyms(
 			synonyms: parsedSynonymWords,
 			antonyms: parsedAntonymWords,
 		});
-	} catch {}
+	} catch (e) {
+		console.warn(
+			"Error when searching for '",
+			payload.word,
+			"' with Datamuse: ",
+			e,
+		);
+	}
 
 	return null;
 }
 
-export { getSearchSuggestions, searchForWordDefinitionAndSynonyms };
+export { getSearchSuggestions, queryWordForDictionaryResult };

@@ -6,15 +6,19 @@ const QUERY_NAME = {
 
 type QUERY_NAME = (typeof QUERY_NAME)[keyof typeof QUERY_NAME];
 
+/** TODO: Each entry must link to it's corresponding api url */
 const DICTIONARY_API = {
 	/** https://www.datamuse.com/api */
 	DATAMUSE: "https://api.datamuse.com",
 
-	/** https://dictionaryapi.dev */
-	DICTIONARY_API: "dictApi",
+	/** https://dictionaryapi.dev. Despite the name, it is **NOT** from google. */
+	GOOGLE_DICTIONARY_API: "https://api.dictionaryapi.dev",
 
 	/** https://freedictionaryapi.com */
-	FREE_DICTIONARY: "freeDictApi",
+	FREE_DICTIONARY: "https://freedictionaryapi.com",
+
+	/** https://www.urbandictionary.com */
+	URBAN_DICTIONARY: "https://unofficialurbandictionaryapi.com",
 } as const;
 
 type DICTIONARY_API = (typeof DICTIONARY_API)[keyof typeof DICTIONARY_API];

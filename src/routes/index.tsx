@@ -1,50 +1,107 @@
 import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
-import { createSignal, For, type JSX, Show, Suspense } from "solid-js";
+import {
+	createMemo,
+	createSignal,
+	For,
+	type JSX,
+	type Setter,
+	Show,
+	Suspense,
+} from "solid-js";
+import LoadingSpinner from "~/components/loading-spinner";
 import Placeholder from "~/components/placeholder";
-import { getSearchSuggestions } from "~/dictionaries/datamuse";
-import { fetchDictionaryResult } from "~/dictionaries/dictionary";
+import { getSearchSuggestions } from "~/dictionaries/datamuse-api";
+import {
+	fetchDictionaryResult,
+	getNameOfDictionaryApi,
+} from "~/dictionaries/dictionary";
+import { DICTIONARY_API } from "~/shared/enums";
+import { gSettings } from "~/shared/store";
 import type { DictionaryWordResult } from "~/types/dictionary";
+import { capitalizeString } from "~/utils/humanify";
 import { generateUUID } from "~/utils/other";
 
-type NullableDictionaryWordResult = DictionaryWordResult | null;
+type DictionaryWordResultCollection = Map<DICTIONARY_API, DictionaryWordResult>;
 
 export default function Home() {
-	const [searchResult, setSearchResult] =
-		createSignal<NullableDictionaryWordResult>(null);
+	const [searchResults, setSearchResults] =
+		createSignal<DictionaryWordResultCollection>(new Map());
 
+	const [searchInput, setSearchInput] = createSignal("");
+
+	const [isFetchingData, setIsFetchingData] = createSignal(false);
+
+	/** Wrapper for searching through all available apis so I won't repeat myself */
 	const searchWord = async (word: string) => {
-		setSearchResult(
-			await fetchDictionaryResult({
-				word: word,
-			}),
+		setIsFetchingData(true);
+
+		setSearchResults(
+			(
+				await Promise.allSettled(
+					[...gSettings.dictionaries].map((dictionary) =>
+						fetchDictionaryResult({
+							word: word,
+							dictionary,
+						}),
+					),
+				)
+			).reduce<DictionaryWordResultCollection>((acc, val) => {
+				if (val.status === "fulfilled" && val.value) {
+					acc.set(val.value.originApi, val.value);
+				}
+
+				return acc;
+			}, new Map()),
 		);
+
+		setIsFetchingData(false);
 	};
 
 	return (
-		<div class="grid grid-cols-2 grid-rows-[3rem_3rem_1fr] md:grid-rows-[3rem_1fr] gap-4 h-[75%] px-4">
-			<SearchBar searchFunction={searchWord} />
-
-			<SearchResults
-				searchResult={searchResult()}
+		<div class="grid grid-cols-2 grid-rows-[3rem_3rem_1fr] md:grid-rows-[3rem_1fr] gap-4 h-[85%] px-4 pb-4">
+			<SearchBar
 				searchFunction={searchWord}
+				searchInput={searchInput()}
+				searchInputSetter={setSearchInput}
 			/>
 
-			<SearchedWordInfo searchResult={searchResult()} />
+			<SearchResults
+				searchResult={searchResults()}
+				searchFunction={searchWord}
+				searchInputSetter={setSearchInput}
+				isFetchingData={isFetchingData()}
+			/>
+
+			<SearchedWordInfo
+				searchResult={searchResults()}
+				searchFunction={searchWord}
+				searchInputSetter={setSearchInput}
+				isFetchingData={isFetchingData()}
+			/>
 		</div>
 	);
 }
 
-function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
+function SearchBar(prop: {
+	searchFunction: (word: string) => Promise<void>;
+	searchInput: string;
+	searchInputSetter: Setter<string>;
+}) {
 	const DATALIST_ID = generateUUID();
 
-	const [searchInput, setSearchInput] = createSignal("");
-
 	const suggestions = createAsync(() => {
-		if (searchInput()) return getSearchSuggestions({ word: searchInput() });
+		if (prop.searchInput.length > 2)
+			return getSearchSuggestions({ word: prop.searchInput });
 
 		return Promise.resolve([]);
 	});
+
+	const cleanInputAndSearch = () => {
+		prop.searchInputSetter((oldVal) => oldVal.trim());
+
+		prop.searchFunction(prop.searchInput);
+	};
 
 	return (
 		<label class="input input-primary col-span-2 justify-self-center self-center w-4/5 md:w-3/5">
@@ -53,17 +110,14 @@ function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
 			<input
 				type="search"
 				placeholder="Search for anything..."
+				value={prop.searchInput}
 				onInput={({ target: { value } }) => {
-					if (value.length > 2) {
-						setSearchInput(value);
-					} else {
-						setSearchInput("");
-					}
+					prop.searchInputSetter(value);
 				}}
 				onKeyUp={({ key }) => {
-					if (key === "Enter") prop.searchFunction(searchInput());
+					if (key === "Enter") cleanInputAndSearch();
 				}}
-				onChange={(_) => prop.searchFunction(searchInput())}
+				onChange={cleanInputAndSearch}
 				list={DATALIST_ID}
 			/>
 
@@ -80,22 +134,43 @@ function SearchBar(prop: { searchFunction: (word: string) => Promise<void> }) {
 
 /** A list including the currently searched word and related ones */
 function SearchResults(prop: {
-	searchResult: NullableDictionaryWordResult;
+	searchResult: DictionaryWordResultCollection;
 	searchFunction: (word: string) => Promise<void>;
+	searchInputSetter: Setter<string>;
+	isFetchingData: boolean;
 }) {
-	const searchResultList = () =>
-		prop.searchResult
-			? [prop.searchResult.name, prop.searchResult.related.synonyms].flat()
-			: [];
+	const searchResultList = createMemo(() =>
+		prop.searchResult.size
+			? [
+					...new Set(
+						[...prop.searchResult.values()]
+							.map((res) => (res ? [res.name, res.related.synonyms] : []))
+							.flat(2),
+					),
+				]
+			: [],
+	);
 
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1 md:p-4">
+			<Show when={prop.isFetchingData}>
+				<LoadingSpinner />
+			</Show>
+
 			<ul class="menu menu-horizontal md:menu-vertical size-full md:text-lg flex-nowrap overflow-x-auto">
 				<For each={searchResultList()} fallback={<Placeholder />}>
-					{(word) => (
+					{(word, index) => (
 						<li>
-							<button type="button" onClick={(_) => prop.searchFunction(word)}>
-								{word}
+							<button
+								type="button"
+								class={`link ${index() === 0 ? "link-primary" : ""}`}
+								onClick={(_) =>
+									prop
+										.searchFunction(word)
+										.then((_) => prop.searchInputSetter(word))
+								}
+							>
+								{capitalizeString(word)}
 							</button>
 						</li>
 					)}
@@ -107,8 +182,14 @@ function SearchResults(prop: {
 
 /** Relevant data about the currently searched word */
 function SearchedWordInfo(prop: {
-	searchResult: NullableDictionaryWordResult;
+	searchResult: DictionaryWordResultCollection;
+	searchFunction: (word: string) => Promise<void>;
+	searchInputSetter: Setter<string>;
+	isFetchingData: boolean;
 }) {
+	const searchFunc = (word: string) =>
+		prop.searchFunction(word).then((_) => prop.searchInputSetter(word));
+
 	function Definitions(prop: {
 		definitions: DictionaryWordResult["definitions"];
 	}) {
@@ -119,12 +200,15 @@ function SearchedWordInfo(prop: {
 						<>
 							<span>Definitions:</span>
 
-							<ul class="mt-1">
+							<ul class="mt-1 flex flex-col gap-1">
 								<For each={definitions()}>
 									{({ definition, partOfSpeech }, index) => (
 										<li>
-											<span>{index()}.</span>{" "}
-											<span> {`(${partOfSpeech})`}</span> {definition}
+											<span>{index() + 1}.</span>{" "}
+											<Show when={partOfSpeech}>
+												<span> {`(${partOfSpeech}) `}</span>
+											</Show>
+											{definition}
 										</li>
 									)}
 								</For>
@@ -136,7 +220,10 @@ function SearchedWordInfo(prop: {
 		);
 	}
 
-	function Examples(prop: { examples: DictionaryWordResult["examples"] }) {
+	function Examples(prop: {
+		examples: DictionaryWordResult["examples"];
+		word: string;
+	}) {
 		return (
 			<div>
 				<Show when={!!prop.examples.length && prop.examples}>
@@ -144,14 +231,32 @@ function SearchedWordInfo(prop: {
 						<>
 							<span>Examples:</span>
 
-							<ul class="mt-1">
+							<ul class="mt-1  flex flex-col gap-1">
 								<For each={examples()}>
-									{({ example, partOfSpeech }, index) => (
-										<li>
-											<span>{index()}.</span>{" "}
-											<span> {`(${partOfSpeech})`}</span> {example}
-										</li>
-									)}
+									{({ example, partOfSpeech }, index) => {
+										// Highlight the specific word in the example, but extracting it from the string and adding the word manually
+										const splitExample = example.split(prop.word);
+
+										return (
+											<li>
+												<span>{index() + 1}.</span>{" "}
+												<Show when={partOfSpeech}>
+													<span> {`(${partOfSpeech}) `}</span>
+												</Show>
+												<For each={splitExample}>
+													{(fragment, index) => (
+														<>
+															{fragment}
+
+															<Show when={index() + 1 < splitExample.length}>
+																<span class="text-info">{prop.word}</span>
+															</Show>
+														</>
+													)}
+												</For>
+											</li>
+										);
+									}}
 								</For>
 							</ul>
 						</>
@@ -173,55 +278,169 @@ function SearchedWordInfo(prop: {
 		);
 	}
 
-	function Audio(prop: { url: DictionaryWordResult["audioUrl"] }) {
+	function Audio(prop: { urls: DictionaryWordResult["audioUrls"] }) {
 		return (
-			<Show when={prop.url}>
-				{(audioUrl) => (
+			<Show when={prop.urls.length}>
+				<div class="flex flex-wrap gap-2">
+					<span>Audio:</span>{" "}
+					<For each={prop.urls}>
+						{(url) => (
+							<>
+								<audio class="inline-block" controls preload="none" src={url}>
+									<track kind="captions"></track>
+								</audio>{" "}
+							</>
+						)}
+					</For>
+				</div>
+			</Show>
+		);
+	}
+
+	function RelatedWordList(prop: { list: string[]; name: string }) {
+		return (
+			<Show when={prop.list.length}>
+				{(length) => (
 					<div>
-						<span>Audio Url:</span>{" "}
-						<a href={audioUrl().toString()}>{audioUrl().toString()}</a>
+						<span>{prop.name}: </span>
+
+						<For each={prop.list}>
+							{(synonym, index) => (
+								<>
+									<button
+										type="button"
+										class="link link-primary"
+										onClick={(_) => searchFunc(synonym)}
+									>
+										{synonym}
+									</button>
+
+									<Show when={index() + 1 < length()} fallback={"."}>
+										{", "}
+									</Show>
+								</>
+							)}
+						</For>
 					</div>
 				)}
 			</Show>
 		);
 	}
 
+	/** The default dictionary result source freshly fetched from the api */
+	const apiResultSourceFromSearchResults = () =>
+		[...prop.searchResult.keys()][0] ?? null;
+
+	/** The dictionary result source that the user explicitly chooses by clicking on */
+	const [apiResultSourceFromUserChoice, setApiResultFromUserChoice] =
+		createSignal<DICTIONARY_API | null>(null);
+
+	/** The dictionary result source to actually use, with priority given to the user's choice */
+	const apiResultSourceToView = createMemo(
+		() => apiResultSourceFromUserChoice() ?? apiResultSourceFromSearchResults(),
+	);
+
+	/** Actual data to use for displaying with a backup incase of edge cases */
+	const apiResultToView = createMemo(
+		() =>
+			prop.searchResult.get(
+				apiResultSourceToView() ?? DICTIONARY_API.DATAMUSE,
+			) ??
+			prop.searchResult.get(
+				apiResultSourceFromSearchResults() ?? DICTIONARY_API.DATAMUSE,
+			),
+	);
+
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1">
-			<Show when={prop.searchResult} fallback={<Placeholder />}>
+			<Show when={prop.isFetchingData}>
+				<LoadingSpinner />
+			</Show>
+
+			<Show when={apiResultToView()} fallback={<Placeholder />}>
 				{(val) => (
 					<div class="size-full overflow-y-auto flex flex-col gap-3 p-4 [&_span]:font-semibold">
 						<div>
-							<span>Name:</span> {val().name}
+							<span>Sourced From:</span>{" "}
+							<span class="text-primary">
+								{getNameOfDictionaryApi(val().originApi)}
+							</span>
 						</div>
+
+						<Show when={prop.searchResult.size > 1}>
+							<div>
+								<span>Other Sources:</span>{" "}
+								<For each={[...prop.searchResult]}>
+									{(res, index) => (
+										<Show when={res[0] !== apiResultSourceToView() && res[1]}>
+											{(res) => (
+												<>
+													<button
+														type="button"
+														class="link link-primary"
+														onClick={(_) =>
+															setApiResultFromUserChoice(res().originApi)
+														}
+													>
+														{getNameOfDictionaryApi(res().originApi)}
+													</button>
+
+													<Show
+														when={index() + 1 < prop.searchResult.size}
+														fallback={"."}
+													>
+														{", "}
+													</Show>
+												</>
+											)}
+										</Show>
+									)}
+								</For>
+							</div>
+						</Show>
 
 						<div>
-							<span>Part Of Speech:</span> {val().partOfSpeech.join(", ")}
+							<span>Name:</span>{" "}
+							<span class="text-primary">{capitalizeString(val().name)}</span>
 						</div>
 
-						<div>
-							<span>IPA Phonetics:</span> {val().phonetics}
-						</div>
+						<Show when={val().partsOfSpeech.length}>
+							<div>
+								<span>Part Of Speech:</span> {val().partsOfSpeech.join(", ")}
+							</div>
+						</Show>
 
-						<Audio url={val().audioUrl} />
+						<Show when={val().phonetics.length}>
+							<div>
+								<span>IPA Phonetics:</span>{" "}
+								<For each={val().phonetics}>
+									{(phonetic, index) => (
+										<>
+											{phonetic}
+
+											<Show
+												when={index() + 1 < val().phonetics.length}
+												fallback={"."}
+											>
+												{", "}
+											</Show>
+										</>
+									)}
+								</For>
+							</div>
+						</Show>
+
+						<Audio urls={val().audioUrls} />
 
 						<Definitions definitions={val().definitions} />
 
-						<Examples examples={val().examples} />
+						<Examples examples={val().examples} word={val().name} />
 
 						<Frequency freq={val().frequency} />
 
-						<Show when={val().related.synonyms.length}>
-							<div>
-								<span>Synonyms:</span> {val().related.synonyms.join(", ")}
-							</div>
-						</Show>
+						<RelatedWordList list={val().related.synonyms} name="Synonyms" />
 
-						<Show when={val().related.antonyms.length}>
-							<div>
-								<span>Antonyms:</span> {val().related.antonyms.join(", ")}
-							</div>
-						</Show>
+						<RelatedWordList list={val().related.antonyms} name="Antonyms" />
 					</div>
 				)}
 			</Show>
@@ -232,7 +451,7 @@ function SearchedWordInfo(prop: {
 function SharedContainer(prop: { class?: string; children: JSX.Element }) {
 	return (
 		<div
-			class={`bg-base-200 rounded-box flex justify-center items-center overflow-hidden ${prop.class}`}
+			class={`relative bg-base-200 rounded-box flex justify-center items-center overflow-hidden ${prop.class}`}
 		>
 			{prop.children}
 		</div>

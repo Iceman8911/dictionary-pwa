@@ -11,6 +11,7 @@
 		"generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.png"
 	},
 	"dependencies": {
+		"@solid-primitives/deep": "^0.3.3",
 		"@solidjs/meta": "^0.29.4",
 		"@solidjs/router": "^0.15.0",
 		"@solidjs/start": "^1.1.0",
@@ -23,6 +24,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.1.2",
 		"@tailwindcss/vite": "^4.0.7",
+		"@typescript/native-preview": "^7.0.0-dev.20250726.1",
 		"@vite-pwa/assets-generator": "^1.0.0",
 		"daisyui": "^5.0.46",
 		"tailwindcss": "^4.0.7",

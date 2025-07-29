@@ -26,26 +26,55 @@ export default defineConfig({
 						{ url: "index.html", revision: "REV_INDEX_HTML_TO_CHANGE" },
 					],
 
-					/** Cache the API calls */
+					/** Cache the API calls for suggestions*/
 					runtimeCaching: [
 						{
-							urlPattern: ({ url }) =>
-								url.origin === "https://api.datamuse.com",
+							urlPattern: ({ url: { origin, pathname } }) =>
+								origin === "https://api.datamuse.com" && pathname === "/sug",
+
 							handler: "StaleWhileRevalidate",
+
 							options: {
 								cacheName: "datamuse-api-calls",
+
 								expiration: {
-									maxEntries: 150,
+									// On average, there will be 3 suggestion api calls per word, and this should cache up to a 100 word suggestions, give or take
+									maxEntries: 310,
+
 									maxAgeSeconds: 60 * 60,
+
+									purgeOnQuotaError: true,
 								},
+
+								cacheableResponse: {
+									statuses: [0, 200],
+								},
+							},
+						},
+						{
+							handler: "StaleWhileRevalidate",
+
+							urlPattern: ({ url: { pathname } }) => pathname.endsWith("mp3"),
+
+							options: {
+								cacheName: "audio-pronounciations",
+
+								expiration: {
+									/** On average, each audio will be ~15KB and I don't wish to go too far beyond ~1MB */
+									maxEntries: 70,
+
+									/** One week */
+									maxAgeSeconds: 60 * 60 * 24 * 7,
+
+									purgeOnQuotaError: true,
+								},
+
 								cacheableResponse: {
 									statuses: [0, 200],
 								},
 							},
 						},
 					],
-
-					// navigateFallbackDenylist: [/^\/api/],
 				},
 
 				manifest: {

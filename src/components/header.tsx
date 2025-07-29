@@ -1,18 +1,30 @@
 import { A } from "@solidjs/router";
-import DictionaryIcon from "lucide-solid/icons/book-marked";
+import InfoIcon from "lucide-solid/icons/info";
 import SettingsIcon from "lucide-solid/icons/settings";
 
 export default function Header() {
 	return (
 		<h1 class="h-20 mb-4 text-3xl font-bold flex justify-center items-center gap-2">
-			<DictionaryIcon class="h-10 w-auto" />
+			<img class="h-10 w-auto" src="/pwa-64x64.png" alt="Dictionary Logo" />
 
-			<A href="/" end>
+			<A href="/" class="hover:link mr-8" end>
 				Lexi Cache
 			</A>
 
 			<A href="/settings" end>
-				<SettingsIcon class="h-8 w-auto ml-8" />
+				<div class="tooltip tooltip-bottom" data-tip="Settings">
+					<button type="button" class="btn btn-circle p-1.5">
+						<SettingsIcon class="h-8 w-auto" />
+					</button>
+				</div>
+			</A>
+
+			<A href="/about" end>
+				<div class="tooltip tooltip-bottom" data-tip="About">
+					<button type="button" class="btn btn-circle p-1.5">
+						<InfoIcon class="h-8 w-auto" />
+					</button>
+				</div>
 			</A>
 		</h1>
 	);
