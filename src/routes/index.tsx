@@ -9,6 +9,7 @@ import {
 	Show,
 	Suspense,
 } from "solid-js";
+import LoadingSpinner from "~/components/loading-spinner";
 import Placeholder from "~/components/placeholder";
 import { getSearchSuggestions } from "~/dictionaries/datamuse";
 import {
@@ -29,8 +30,12 @@ export default function Home() {
 
 	const [searchInput, setSearchInput] = createSignal("");
 
+	const [isFetchingData, setIsFetchingData] = createSignal(false);
+
 	/** Wrapper for searching through all available apis so I won't repeat myself */
 	const searchWord = async (word: string) => {
+		setIsFetchingData(true);
+
 		setSearchResults(
 			(
 				await Promise.allSettled(
@@ -49,6 +54,8 @@ export default function Home() {
 				return acc;
 			}, new Map()),
 		);
+
+		setIsFetchingData(false);
 	};
 
 	return (
@@ -63,12 +70,14 @@ export default function Home() {
 				searchResult={searchResults()}
 				searchFunction={searchWord}
 				searchInputSetter={setSearchInput}
+				isFetchingData={isFetchingData()}
 			/>
 
 			<SearchedWordInfo
 				searchResult={searchResults()}
 				searchFunction={searchWord}
 				searchInputSetter={setSearchInput}
+				isFetchingData={isFetchingData()}
 			/>
 		</div>
 	);
@@ -128,6 +137,7 @@ function SearchResults(prop: {
 	searchResult: DictionaryWordResultCollection;
 	searchFunction: (word: string) => Promise<void>;
 	searchInputSetter: Setter<string>;
+	isFetchingData: boolean;
 }) {
 	const searchResultList = createMemo(() =>
 		prop.searchResult.size
@@ -143,6 +153,10 @@ function SearchResults(prop: {
 
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1 md:p-4">
+			<Show when={prop.isFetchingData}>
+				<LoadingSpinner />
+			</Show>
+
 			<ul class="menu menu-horizontal md:menu-vertical size-full md:text-lg flex-nowrap overflow-x-auto">
 				<For each={searchResultList()} fallback={<Placeholder />}>
 					{(word, index) => (
@@ -171,6 +185,7 @@ function SearchedWordInfo(prop: {
 	searchResult: DictionaryWordResultCollection;
 	searchFunction: (word: string) => Promise<void>;
 	searchInputSetter: Setter<string>;
+	isFetchingData: boolean;
 }) {
 	const searchFunc = (word: string) =>
 		prop.searchFunction(word).then((_) => prop.searchInputSetter(word));
@@ -333,6 +348,10 @@ function SearchedWordInfo(prop: {
 
 	return (
 		<SharedContainer class="col-span-2 md:col-span-1">
+			<Show when={prop.isFetchingData}>
+				<LoadingSpinner />
+			</Show>
+
 			<Show when={apiResultToView()} fallback={<Placeholder />}>
 				{(val) => (
 					<div class="size-full overflow-y-auto flex flex-col gap-3 p-4 [&_span]:font-semibold">
@@ -423,7 +442,7 @@ function SearchedWordInfo(prop: {
 function SharedContainer(prop: { class?: string; children: JSX.Element }) {
 	return (
 		<div
-			class={`bg-base-200 rounded-box flex justify-center items-center overflow-hidden ${prop.class}`}
+			class={`relative bg-base-200 rounded-box flex justify-center items-center overflow-hidden ${prop.class}`}
 		>
 			{prop.children}
 		</div>
