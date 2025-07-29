@@ -11,7 +11,7 @@ type DictionaryWordResult = Readonly<{
 	/** IPA phonetics */
 	phonetics: `/${string}/` | `[${string}]`;
 
-	partOfSpeech: NullishPartOfSpeech[];
+	partsOfSpeech: NullishPartOfSpeech[];
 
 	/** The API that this data was generated from */
 	originApi: DICTIONARY_API;

@@ -4,7 +4,7 @@ import { DICTIONARY_API, QUERY_NAME } from "~/shared/enums";
 import { ABORT_EARLY_CONFIG } from "~/shared/valibot";
 import type { DictionaryWordResult } from "~/types/dictionary";
 
-type PartOfSpeech = DictionaryWordResult["partOfSpeech"][0];
+type PartOfSpeech = DictionaryWordResult["partsOfSpeech"][0];
 
 const { DATAMUSE: DATAMUSE_BASE_URL } = DICTIONARY_API;
 
@@ -302,7 +302,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 			frequency,
 			name: mainWordsResponse.word,
 			originApi: DATAMUSE_BASE_URL,
-			partOfSpeech,
+			partsOfSpeech: partOfSpeech,
 			phonetics,
 			related: { antonyms: [], synonyms: [] },
 		};

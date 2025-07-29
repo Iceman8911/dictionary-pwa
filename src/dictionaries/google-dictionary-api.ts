@@ -185,7 +185,7 @@ function convertResponseToDictionaryResult(
 		frequency: null,
 		name: word,
 		originApi: GOOGLE_DICTIONARY_API,
-		partOfSpeech: [...new Set(partOfSpeech)],
+		partsOfSpeech: [...new Set(partOfSpeech)],
 		phonetics: getRandomElementInArray(ipaPhonetics) ?? "[]",
 		related: {
 			antonyms: [...new Set(antonyms)],

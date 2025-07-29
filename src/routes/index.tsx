@@ -381,7 +381,7 @@ function SearchedWordInfo(prop: {
 						</div>
 
 						<div>
-							<span>Part Of Speech:</span> {val().partOfSpeech.join(", ")}
+							<span>Part Of Speech:</span> {val().partsOfSpeech.join(", ")}
 						</div>
 
 						<div>
