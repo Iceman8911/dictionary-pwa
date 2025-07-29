@@ -1,3 +1,8 @@
+// Naming scheme for schemas:
+// - If only the schema is needed, end the name with "Schema", e.g "LowerCaseSchema"
+// - If only the schema and output type are needed, they should have the same name, e.g "UrlString"
+// - If the schema, input, and output type are needed, append "Schema" to the schema, "Input" to the input type, and "Output" to the output type, e.g "UsernameSchema", "UsernameInput", and "UsernameOutput"
+
 import * as v from "valibot";
 
 const UrlString = v.pipe(v.string(), v.url(), v.brand("url"));
