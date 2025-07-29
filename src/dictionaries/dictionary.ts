@@ -48,6 +48,8 @@ async function fetchFromApi(
 	word: string,
 	maxResults: number,
 ): Promise<DictionaryWordResult | null> {
+	word = word.trim();
+
 	const cacheKey: DictionaryWordIndexeddbKey = `${api}-${word}`;
 
 	const cachedData = await idb.get(cacheKey);
