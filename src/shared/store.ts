@@ -6,8 +6,8 @@ import { DICTIONARY_API as DictionaryApis } from "./enums";
 const { DATAMUSE } = DictionaryApis;
 
 const gDefaultSettings = {
-	/** 1 hour */
-	cacheDuration: 1000 * 60 * 60,
+	/** 1 day */
+	cacheDuration: 1000 * 60 * 60 * 24,
 
 	/** 1000 cached entries */
 	cacheSize: 1000,
