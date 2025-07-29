@@ -8,7 +8,8 @@ import type {
 import * as idb from "~/utils/idb";
 import { gIsUserConnectedToInternet } from "~/utils/internet";
 import { searchForWordDefinitionAndSynonyms } from "./datamuse";
-import { queryWordForDictionaryResult } from "./google-dictionary-api";
+import { queryWordForDictionaryResult as queryWordForDictionaryResultFromFreeDictionaryApi } from "./free-dictionary-api";
+import { queryWordForDictionaryResult as queryWordForDictionaryResultFromGoogleDictionaryApi } from "./google-dictionary-api";
 
 /** Attempts to get the dictionary results of a particular word.
  *
@@ -74,13 +75,15 @@ async function fetchFromApi(
 		}
 
 		case DICTIONARY_API: {
-			fetchedData = await queryWordForDictionaryResult(word);
+			fetchedData =
+				await queryWordForDictionaryResultFromGoogleDictionaryApi(word);
 
 			break;
 		}
 
 		case FREE_DICTIONARY: {
-			fetchedData = null;
+			fetchedData =
+				await queryWordForDictionaryResultFromFreeDictionaryApi(word);
 
 			break;
 		}

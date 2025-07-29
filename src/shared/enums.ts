@@ -15,7 +15,7 @@ const DICTIONARY_API = {
 	GOOGLE_DICTIONARY_API: "https://api.dictionaryapi.dev",
 
 	/** https://freedictionaryapi.com */
-	FREE_DICTIONARY: "freeDictApi",
+	FREE_DICTIONARY: "https://freedictionaryapi.com",
 } as const;
 
 type DICTIONARY_API = (typeof DICTIONARY_API)[keyof typeof DICTIONARY_API];
