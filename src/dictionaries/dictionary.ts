@@ -183,18 +183,14 @@ async function cleanupExpiredCachedEntriesWhenAboveSizeLimit() {
 }
 
 function getNameOfDictionaryApi(api: DictionaryApis) {
-	const {
-		DATAMUSE,
-		GOOGLE_DICTIONARY_API: DICTIONARY_API,
-		FREE_DICTIONARY,
-	} = DictionaryApis;
+	const { DATAMUSE, GOOGLE_DICTIONARY_API, FREE_DICTIONARY } = DictionaryApis;
 
 	switch (api) {
 		case DATAMUSE:
 			return "Datamuse";
 
-		case DICTIONARY_API:
-			return "Dictionary Api";
+		case GOOGLE_DICTIONARY_API:
+			return "Google Dictionary";
 
 		case FREE_DICTIONARY:
 			return "Free Dictionary";
