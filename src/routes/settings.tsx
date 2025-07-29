@@ -1,6 +1,6 @@
 import { trackStore } from "@solid-primitives/deep";
 import InfoIcon from "lucide-solid/icons/info";
-import { createEffect, For, on, Show } from "solid-js";
+import { createEffect, For, Match, on, Show, Switch } from "solid-js";
 import { createStore, produce, type StoreSetter, unwrap } from "solid-js/store";
 import { getNameOfDictionaryApi } from "~/dictionaries/dictionary";
 import { DICTIONARY_API } from "~/shared/enums";
@@ -32,6 +32,8 @@ export default function Settings() {
 	);
 
 	function SelectedDictionaryApis() {
+		const { DATAMUSE, URBAN_DICTIONARY } = DICTIONARY_API;
+
 		return (
 			<fieldset class="fieldset bg-base-200 border-base-300 rounded-box size-fit border p-4">
 				<legend class="fieldset-legend">Dictionaries To Use</legend>
@@ -57,14 +59,25 @@ export default function Settings() {
 									}}
 									class="checkbox"
 								/>
-								<Show when={val === DICTIONARY_API.URBAN_DICTIONARY}>
-									<span
-										class="tooltip tooltip-right lg:tooltip-top"
-										data-tip="Enabling this may slow down the search"
-									>
-										<InfoIcon class="size-4" />
-									</span>
-								</Show>
+								<Switch>
+									<Match when={val === URBAN_DICTIONARY}>
+										<span
+											class="tooltip tooltip-right lg:tooltip-top"
+											data-tip="Enabling this may slow down the search"
+										>
+											<InfoIcon class="size-4" />
+										</span>
+									</Match>
+
+									<Match when={val === DATAMUSE}>
+										<span
+											class="tooltip tooltip-right lg:tooltip-top"
+											data-tip="Also provides suggestions"
+										>
+											<InfoIcon class="size-4" />
+										</span>
+									</Match>
+								</Switch>
 								{getNameOfDictionaryApi(val)}{" "}
 								<a
 									href={val}
