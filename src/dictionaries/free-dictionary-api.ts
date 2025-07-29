@@ -129,6 +129,12 @@ const ResponseSchema = v.object({
 
 			/** All the different meanings of this word */
 			senses: v.array(SensesSchema),
+
+			/** Words that mean the same thing as this word (for the whole entry) */
+			synonyms: StringArraySchema,
+
+			/** Words that mean the opposite of this word (for the whole entry) */
+			antonyms: StringArraySchema,
 		}),
 	),
 
