@@ -294,7 +294,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 		);
 
 		const mainDictionaryResult: DictionaryWordResult = {
-			audioUrl: null,
+			audioUrls: [],
 			definitions: mainWordsResponse.defs.map((val) =>
 				extractPartOfSpeechFromDefinition(val),
 			),

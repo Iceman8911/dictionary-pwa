@@ -257,22 +257,21 @@ function SearchedWordInfo(prop: {
 		);
 	}
 
-	function Audio(prop: { url: DictionaryWordResult["audioUrl"] }) {
+	function Audio(prop: { urls: DictionaryWordResult["audioUrls"] }) {
 		return (
-			<Show when={prop.url}>
-				{(audioUrl) => (
-					<div>
-						<span>Audio:</span>{" "}
-						<audio
-							class="inline-block"
-							controls
-							preload="none"
-							src={audioUrl()}
-						>
-							<track kind="captions"></track>
-						</audio>
-					</div>
-				)}
+			<Show when={prop.urls.length}>
+				<div class="flex flex-wrap gap-2">
+					<span>Audio:</span>{" "}
+					<For each={prop.urls}>
+						{(url) => (
+							<>
+								<audio class="inline-block" controls preload="none" src={url}>
+									<track kind="captions"></track>
+								</audio>{" "}
+							</>
+						)}
+					</For>
+				</div>
 			</Show>
 		);
 	}
@@ -402,7 +401,7 @@ function SearchedWordInfo(prop: {
 							</For>
 						</div>
 
-						<Audio url={val().audioUrl} />
+						<Audio urls={val().audioUrls} />
 
 						<Definitions definitions={val().definitions} />
 

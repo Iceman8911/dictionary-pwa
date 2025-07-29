@@ -2,7 +2,6 @@ import * as v from "valibot";
 import { DICTIONARY_API } from "~/shared/enums";
 import { type DictionaryWordResult, IpaPhonetic } from "~/types/dictionary";
 import { PartOfSpeech, StringArraySchema, UrlString } from "~/types/schema";
-import { getRandomElementInArray } from "~/utils/other";
 
 const { GOOGLE_DICTIONARY_API } = DICTIONARY_API;
 
@@ -176,7 +175,7 @@ function convertResponseToDictionaryResult(
 
 	// REVIEW: Maybe pick a fixed value
 	return {
-		audioUrl: getRandomElementInArray(audioUrls),
+		audioUrls,
 		definitions,
 		examples,
 		frequency: null,

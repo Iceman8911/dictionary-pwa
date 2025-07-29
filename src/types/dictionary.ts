@@ -26,7 +26,7 @@ type DictionaryWordResult = Readonly<{
 		antonyms: string[];
 	};
 
-	audioUrl: UrlString | null;
+	audioUrls: UrlString[];
 
 	frequency:
 		| "very common"

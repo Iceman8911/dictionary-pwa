@@ -291,7 +291,7 @@ function convertResponseToDictionaryResult(
 	);
 
 	return {
-		audioUrl: null,
+		audioUrls: [],
 		definitions,
 		examples,
 		frequency: null,
