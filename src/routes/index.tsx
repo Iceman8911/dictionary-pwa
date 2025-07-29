@@ -347,18 +347,27 @@ function SearchedWordInfo(prop: {
 							<div>
 								<span>Other Sources:</span>{" "}
 								<For each={[...prop.searchResult]}>
-									{(res) => (
+									{(res, index) => (
 										<Show when={res[0] !== apiResultSourceToView() && res[1]}>
 											{(res) => (
-												<button
-													type="button"
-													class="link link-primary"
-													onClick={(_) =>
-														setApiResultFromUserChoice(res().originApi)
-													}
-												>
-													{getNameOfDictionaryApi(res().originApi)}
-												</button>
+												<>
+													<button
+														type="button"
+														class="link link-primary"
+														onClick={(_) =>
+															setApiResultFromUserChoice(res().originApi)
+														}
+													>
+														{getNameOfDictionaryApi(res().originApi)}
+													</button>
+
+													<Show
+														when={index() + 1 < prop.searchResult.size}
+														fallback={"."}
+													>
+														{", "}
+													</Show>
+												</>
 											)}
 										</Show>
 									)}
