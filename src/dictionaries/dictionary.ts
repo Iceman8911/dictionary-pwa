@@ -218,9 +218,10 @@ async function getSearchSuggestions(
 ): Promise<ReadonlyArray<string>> {
 	const suggestionArrayPromises: Array<Promise<ReadonlyArray<string>>> = [];
 
-	suggestionArrayPromises.push(
-		getSearchSuggestionsFromDatamuseApi({ word: input }),
-	);
+	if (gSettings.dictionaries.has(DATAMUSE))
+		suggestionArrayPromises.push(
+			getSearchSuggestionsFromDatamuseApi({ word: input }),
+		);
 
 	const fulfilledSuggestionArray = (
 		await Promise.allSettled(suggestionArrayPromises)
