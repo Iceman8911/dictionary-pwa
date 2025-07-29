@@ -205,7 +205,10 @@ function SearchedWordInfo(prop: {
 									{({ definition, partOfSpeech }, index) => (
 										<li>
 											<span>{index()}.</span>{" "}
-											<span> {`(${partOfSpeech})`}</span> {definition}
+											<Show when={partOfSpeech}>
+												<span> {`(${partOfSpeech}) `}</span>
+											</Show>
+											{definition}
 										</li>
 									)}
 								</For>
@@ -237,7 +240,9 @@ function SearchedWordInfo(prop: {
 										return (
 											<li>
 												<span>{index()}.</span>{" "}
-												<span> {`(${partOfSpeech})`}</span>{" "}
+												<Show when={partOfSpeech}>
+													<span> {`(${partOfSpeech}) `}</span>
+												</Show>
 												<For each={splitExample}>
 													{(fragment, index) => (
 														<>
@@ -399,27 +404,31 @@ function SearchedWordInfo(prop: {
 							<span class="text-primary">{capitalizeString(val().name)}</span>
 						</div>
 
-						<div>
-							<span>Part Of Speech:</span> {val().partsOfSpeech.join(", ")}
-						</div>
+						<Show when={val().partsOfSpeech.length}>
+							<div>
+								<span>Part Of Speech:</span> {val().partsOfSpeech.join(", ")}
+							</div>
+						</Show>
 
-						<div>
-							<span>IPA Phonetics:</span>{" "}
-							<For each={val().phonetics}>
-								{(phonetic, index) => (
-									<>
-										{phonetic}
+						<Show when={val().phonetics.length}>
+							<div>
+								<span>IPA Phonetics:</span>{" "}
+								<For each={val().phonetics}>
+									{(phonetic, index) => (
+										<>
+											{phonetic}
 
-										<Show
-											when={index() + 1 < val().phonetics.length}
-											fallback={"."}
-										>
-											{", "}
-										</Show>
-									</>
-								)}
-							</For>
-						</div>
+											<Show
+												when={index() + 1 < val().phonetics.length}
+												fallback={"."}
+											>
+												{", "}
+											</Show>
+										</>
+									)}
+								</For>
+							</div>
+						</Show>
 
 						<Audio urls={val().audioUrls} />
 
