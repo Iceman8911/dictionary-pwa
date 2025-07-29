@@ -155,6 +155,7 @@ async function cleanupExpiredCachedEntriesWhenAboveSizeLimit() {
 
 			if (batch.length === batchSize) {
 				yield resolveBatch(batch);
+				batch.length = 0;
 			}
 		}
 
