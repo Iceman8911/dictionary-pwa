@@ -179,6 +179,8 @@ function convertResponseToDictionaryResult(
 ): DictionaryWordResult | null {
 	const { entries, word } = response;
 
+	if (!entries.length) return null;
+
 	const [
 		partsOfSpeech,
 		ipaPhonetics,
