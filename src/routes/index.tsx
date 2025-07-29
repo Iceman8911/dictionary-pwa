@@ -204,7 +204,7 @@ function SearchedWordInfo(prop: {
 								<For each={definitions()}>
 									{({ definition, partOfSpeech }, index) => (
 										<li>
-											<span>{index()}.</span>{" "}
+											<span>{index() + 1}.</span>{" "}
 											<Show when={partOfSpeech}>
 												<span> {`(${partOfSpeech}) `}</span>
 											</Show>
@@ -239,7 +239,7 @@ function SearchedWordInfo(prop: {
 
 										return (
 											<li>
-												<span>{index()}.</span>{" "}
+												<span>{index() + 1}.</span>{" "}
 												<Show when={partOfSpeech}>
 													<span> {`(${partOfSpeech}) `}</span>
 												</Show>
