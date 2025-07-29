@@ -16,6 +16,9 @@ const DICTIONARY_API = {
 
 	/** https://freedictionaryapi.com */
 	FREE_DICTIONARY: "https://freedictionaryapi.com",
+
+	/** https://www.urbandictionary.com */
+	URBAN_DICTIONARY: "https://unofficialurbandictionaryapi.com",
 } as const;
 
 type DICTIONARY_API = (typeof DICTIONARY_API)[keyof typeof DICTIONARY_API];

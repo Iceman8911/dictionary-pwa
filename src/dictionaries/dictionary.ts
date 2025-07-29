@@ -10,6 +10,10 @@ import { gIsUserConnectedToInternet } from "~/utils/internet";
 import { queryWordForDictionaryResult as queryWordForDictionaryResultFromDatamuseApi } from "./datamuse-api";
 import { queryWordForDictionaryResult as queryWordForDictionaryResultFromFreeDictionaryApi } from "./free-dictionary-api";
 import { queryWordForDictionaryResult as queryWordForDictionaryResultFromGoogleDictionaryApi } from "./google-dictionary-api";
+import { queryWordForDictionaryResult as queryWordForDictionaryResultFromUrbanDictionaryApi } from "./urban-dictionary-api";
+
+const { DATAMUSE, GOOGLE_DICTIONARY_API, FREE_DICTIONARY, URBAN_DICTIONARY } =
+	DictionaryApis;
 
 /** Attempts to get the dictionary results of a particular word.
  *
@@ -44,12 +48,6 @@ async function fetchFromApi(
 	word: string,
 	maxResults: number,
 ): Promise<DictionaryWordResult | null> {
-	const {
-		DATAMUSE,
-		GOOGLE_DICTIONARY_API: DICTIONARY_API,
-		FREE_DICTIONARY,
-	} = DictionaryApis;
-
 	const cacheKey: DictionaryWordIndexeddbKey = `${api}-${word}`;
 
 	const cachedData = await idb.get(cacheKey);
@@ -74,7 +72,7 @@ async function fetchFromApi(
 			break;
 		}
 
-		case DICTIONARY_API: {
+		case GOOGLE_DICTIONARY_API: {
 			fetchedData =
 				await queryWordForDictionaryResultFromGoogleDictionaryApi(word);
 
@@ -84,6 +82,13 @@ async function fetchFromApi(
 		case FREE_DICTIONARY: {
 			fetchedData =
 				await queryWordForDictionaryResultFromFreeDictionaryApi(word);
+
+			break;
+		}
+
+		case URBAN_DICTIONARY: {
+			fetchedData =
+				await queryWordForDictionaryResultFromUrbanDictionaryApi(word);
 
 			break;
 		}
@@ -183,8 +188,6 @@ async function cleanupExpiredCachedEntriesWhenAboveSizeLimit() {
 }
 
 function getNameOfDictionaryApi(api: DictionaryApis) {
-	const { DATAMUSE, GOOGLE_DICTIONARY_API, FREE_DICTIONARY } = DictionaryApis;
-
 	switch (api) {
 		case DATAMUSE:
 			return "Datamuse";
@@ -194,6 +197,9 @@ function getNameOfDictionaryApi(api: DictionaryApis) {
 
 		case FREE_DICTIONARY:
 			return "Free Dictionary";
+
+		case URBAN_DICTIONARY:
+			return "Urban Dictionary";
 
 		default:
 			return "Null";

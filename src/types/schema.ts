@@ -26,4 +26,38 @@ const PartOfSpeech = v.union([
 
 type PartOfSpeech = v.InferOutput<typeof PartOfSpeech>;
 
-export { UrlString, StringArraySchema, PartOfSpeech };
+const HttpStatusCode = v.pipe(
+	v.number(),
+	v.integer(),
+	v.minValue(100),
+	v.maxValue(599),
+);
+
+type HttpStatusCode = v.InferOutput<typeof HttpStatusCode>;
+
+const BooleanString = v.union([
+	v.literal("true"),
+	v.literal("false"),
+	v.boolean(),
+]);
+
+type BooleanString = v.InferOutput<typeof BooleanString>;
+
+const NumberString = v.pipe(
+	v.string(),
+	v.custom<`${number}`>((str) => !Number.isNaN(Number(str))),
+);
+
+type NumberString = v.InferOutput<typeof NumberString>;
+
+const LowerCaseSchema = v.pipe(v.string(), v.toLowerCase());
+
+export {
+	UrlString,
+	StringArraySchema,
+	PartOfSpeech,
+	HttpStatusCode,
+	BooleanString,
+	NumberString,
+	LowerCaseSchema,
+};
