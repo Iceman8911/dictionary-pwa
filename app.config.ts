@@ -119,6 +119,8 @@ export default defineConfig({
 			}),
 		],
 
+		resolve: { conditions: ["development", "browser"] },
+
 		build: {
 			minify: "terser",
 

@@ -8,7 +8,8 @@
 		"bun-dev": "bun --bun vinxi dev --port=3001",
 		"bun-build": "bun --bun vinxi build && bun --bun ./scripts/set-html-hash.mjs",
 		"bun-start": "bun --bun vinxi start --port=3001",
-		"generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.png"
+		"generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.png",
+		"test": "vitest"
 	},
 	"dependencies": {
 		"@solid-primitives/deep": "^0.3.3",
@@ -23,12 +24,17 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.1.2",
+		"@solidjs/testing-library": "^0.8.10",
 		"@tailwindcss/vite": "^4.0.7",
+		"@testing-library/jest-dom": "^6.6.4",
+		"@testing-library/user-event": "^14.6.1",
 		"@typescript/native-preview": "^7.0.0-dev.20250726.1",
 		"@vite-pwa/assets-generator": "^1.0.0",
 		"daisyui": "^5.0.46",
+		"jsdom": "^26.1.0",
 		"tailwindcss": "^4.0.7",
 		"vite-plugin-pwa": "^1.0.1",
+		"vitest": "^3.2.4",
 		"workbox-window": "^7.3.0"
 	},
 	"engines": {

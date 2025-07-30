@@ -13,7 +13,8 @@
 		"types": [
 			"vinxi/types/client",
 			"vite-plugin-pwa/solid",
-			"vite-plugin-pwa/info"
+			"vite-plugin-pwa/info",
+			"@testing-library/jest-dom"
 		],
 		"isolatedModules": true,
 		"paths": {
