@@ -15,9 +15,7 @@ const SUGGESTION_ENDPOINT = `${DATAMUSE_BASE_URL}/sug`;
 const GenericPayloadSchema = v.object({
 	word: v.pipe(
 		v.string(),
-		v.transform((str) =>
-			str.replaceAll(" ", "+").replaceAll("-", "+").toLowerCase(),
-		),
+		v.transform((str) => str.replaceAll(" ", "+").replaceAll("-", "+")),
 	),
 
 	/** Max value of 1000
@@ -166,6 +164,8 @@ type WordSearchResponseOutputDefinitionAndRelated = {
 	main: WordSearchResponseOutput[0];
 	synonyms: WordSearchResponseOutput;
 	antonyms: WordSearchResponseOutput;
+	/** The original search term */
+	searchTerm: string;
 };
 
 function convertWordSearchResponseOutputToDictionarySchema(
@@ -281,6 +281,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 	const {
 		antonyms: antonymWordsResponse,
 		main: mainWordsResponse,
+		searchTerm,
 		synonyms: synonymWordsResponse,
 	} = response;
 
@@ -296,7 +297,7 @@ function convertWordSearchResponseOutputToDictionarySchema(
 			),
 			examples: [],
 			frequency,
-			name: mainWordsResponse.word,
+			name: searchTerm,
 			originApi: DATAMUSE_BASE_URL,
 			partsOfSpeech: partOfSpeech,
 			phonetics,
@@ -366,7 +367,9 @@ async function queryWordForDictionaryResult(
 		// Required for cases like "read-only", where the first result is "read", and the second is actually "read-only"
 		const parsedExactWord = parsedPossibleExactWords.filter(
 			// The word may be multiple joined by "+", e.g "care+free"
-			(val) => val?.word.replaceAll(" ", "") === word.replaceAll("+", ""),
+			(val) =>
+				val?.word.toLocaleLowerCase().replaceAll(" ", "") ===
+				word.toLocaleLowerCase().replaceAll("+", ""),
 		)[0];
 
 		if (!parsedExactWord) return null;
@@ -377,6 +380,7 @@ async function queryWordForDictionaryResult(
 			main: parsedExactWord,
 			synonyms: parsedSynonymWords,
 			antonyms: parsedAntonymWords,
+			searchTerm: word,
 		});
 	} catch (e) {
 		console.warn(

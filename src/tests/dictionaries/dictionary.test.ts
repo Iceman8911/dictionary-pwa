@@ -23,8 +23,6 @@ describe("fetchDictionaryResult", () => {
 			word: WORD,
 		});
 
-		console.log(result);
-
 		expect(result).not.toBeNull();
 		expect(result?.name).toBe(WORD);
 		expect(set).toHaveBeenCalledTimes(1); // Ensure data was attempted to be cached
