@@ -13,10 +13,7 @@ const WORDS_ENDPOINT = `${DATAMUSE_BASE_URL}/words`;
 const SUGGESTION_ENDPOINT = `${DATAMUSE_BASE_URL}/sug`;
 
 const GenericPayloadSchema = v.object({
-	word: v.pipe(
-		v.string(),
-		v.transform((str) => str.replaceAll(" ", "+").replaceAll("-", "+")),
-	),
+	word: v.string(),
 
 	/** Max value of 1000
 	 *
@@ -366,10 +363,7 @@ async function queryWordForDictionaryResult(
 
 		// Required for cases like "read-only", where the first result is "read", and the second is actually "read-only"
 		const parsedExactWord = parsedPossibleExactWords.filter(
-			// The word may be multiple joined by "+", e.g "care+free"
-			(val) =>
-				val?.word.toLocaleLowerCase().replaceAll(" ", "") ===
-				word.toLocaleLowerCase().replaceAll("+", ""),
+			(val) => val?.word.toLocaleLowerCase() === word.toLocaleLowerCase(),
 		)[0];
 
 		if (!parsedExactWord) return null;

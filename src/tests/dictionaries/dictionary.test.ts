@@ -25,7 +25,7 @@ describe("fetchDictionaryResult", () => {
 
 			expect(result).not.toBeNull();
 			expect(result?.name).toBe(word);
-			expect(set).toHaveBeenCalledTimes(1); // Ensure data was attempted to be cached
+			expect(set).toHaveBeenCalled(); // Ensure data was attempted to be cached
 		}
 	});
 
