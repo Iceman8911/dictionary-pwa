@@ -5,83 +5,95 @@ import { BooleanString, HttpStatusCode, NumberString } from "~/types/schema";
 
 const { URBAN_DICTIONARY } = DICTIONARY_API;
 
-const ResponseSchema = v.object({
-	/** Should be in the 200 range if successful */
-	statusCode: HttpStatusCode,
+const ResponseSchema = v.union([
+	v.object({
+		/** Should be in the 200 range if successful */
+		statusCode: HttpStatusCode,
 
-	/** The searched word or phrase */
-	term: v.string(),
+		/** The searched word or phrase */
+		term: v.string(),
 
-	/** Whether `data` will be populated */
-	found: BooleanString,
+		/** Whether `data` will be populated */
+		found: BooleanString,
 
-	params: v.object({
-		/** Whether to return only exact matches **Eg. return only "bigger" and not "biggering", "biggered"** */
-		strict: BooleanString,
+		params: v.object({
+			/** Whether to return only exact matches **Eg. return only "bigger" and not "biggering", "biggered"** */
+			strict: BooleanString,
 
-		limit: NumberString,
+			limit: NumberString,
 
-		matchCase: BooleanString,
+			matchCase: BooleanString,
 
-		scrapeType: v.union([
-			v.literal("search"),
-			v.literal("random"),
-			v.literal("browse"),
-			v.literal("author"),
-			v.literal("date"),
-		]),
+			scrapeType: v.union([
+				v.literal("search"),
+				v.literal("random"),
+				v.literal("browse"),
+				v.literal("author"),
+				v.literal("date"),
+			]),
 
-		/** Eg. page = 5, get all definitions from the 5th page only */
-		page: NumberString,
+			/** Eg. page = 5, get all definitions from the 5th page only */
+			page: NumberString,
 
-		/** 'false' or stuff like '2,4' where '2,4' will return all definitions from page 2 to page 4*/
-		multiPage: v.pipe(
-			v.string(),
-			v.custom<`${number},${number}` | "false">((str) => {
-				if (typeof str !== "string") return false;
+			/** 'false' or stuff like '2,4' where '2,4' will return all definitions from page 2 to page 4*/
+			multiPage: v.pipe(
+				v.string(),
+				v.custom<`${number},${number}` | "false">((str) => {
+					if (typeof str !== "string") return false;
 
-				const booleanStringParse = v.safeParse(BooleanString, str);
+					const booleanStringParse = v.safeParse(BooleanString, str);
 
-				if (booleanStringParse.success) return true;
+					if (booleanStringParse.success) return true;
 
-				const [minPageNumberString, maxPageNumberString] = str.split(",");
+					const [minPageNumberString, maxPageNumberString] = str.split(",");
 
-				const minPageNumber = Number(minPageNumberString);
+					const minPageNumber = Number(minPageNumberString);
 
-				const maxPageNumber = Number(maxPageNumberString);
+					const maxPageNumber = Number(maxPageNumberString);
 
-				if (
-					!Number.isNaN(minPageNumber) &&
-					!Number.isNaN(maxPageNumber) &&
-					maxPageNumber >= minPageNumber
-				)
-					return true;
+					if (
+						!Number.isNaN(minPageNumber) &&
+						!Number.isNaN(maxPageNumber) &&
+						maxPageNumber >= minPageNumber
+					)
+						return true;
 
-				return false;
+					return false;
+				}),
+			),
+		}),
+
+		/** Number of pages the results were extracted from */
+		totalPages: v.number(),
+
+		/** The real useful stuff */
+		data: v.array(
+			v.object({
+				word: v.string(),
+
+				meaning: v.string(),
+
+				example: v.string(),
+
+				/** Account that uploaded this meaning */
+				contributor: v.string(),
+
+				/** e.g "February 04, 2004" */
+				date: v.string(),
 			}),
 		),
 	}),
+	v.object({
+		/** Will be 404 or smth */
+		statusCode: HttpStatusCode,
 
-	/** Number of pages the results were extracted from */
-	totalPages: v.number(),
+		term: v.string(),
 
-	/** The real useful stuff */
-	data: v.array(
-		v.object({
-			word: v.string(),
+		data: v.tuple([]),
 
-			meaning: v.string(),
-
-			example: v.string(),
-
-			/** Account that uploaded this meaning */
-			contributor: v.string(),
-
-			/** e.g "February 04, 2004" */
-			date: v.string(),
-		}),
-	),
-});
+		message: v.literal("No definitions found for this word"),
+	}),
+]);
 
 type ResponseOutput = v.InferOutput<typeof ResponseSchema>;
 
@@ -113,7 +125,7 @@ async function fetchResponse(
 function convertResponseToDictionaryResult(
 	response: ResponseOutput | null,
 ): DictionaryWordResult | null {
-	if (!response) return null;
+	if (!response || "message" in response) return null;
 
 	const { data, term } = response;
 
