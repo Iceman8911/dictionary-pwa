@@ -68,11 +68,11 @@ async function fetchFromApi(
 		return cachedData.data;
 	}
 
-	let fetchedData: DictionaryWordResult | null = null;
+	let fetchedData: Promise<DictionaryWordResult | null>;
 
 	switch (api) {
 		case DATAMUSE: {
-			fetchedData = await queryWordForDictionaryResultFromDatamuseApi({
+			fetchedData = queryWordForDictionaryResultFromDatamuseApi({
 				word,
 				maxResults,
 			});
@@ -81,21 +81,19 @@ async function fetchFromApi(
 		}
 
 		case GOOGLE_DICTIONARY_API: {
-			fetchedData =
-				await queryWordForDictionaryResultFromGoogleDictionaryApi(word);
+			fetchedData = queryWordForDictionaryResultFromGoogleDictionaryApi(word);
 
 			break;
 		}
 
 		case FREE_DICTIONARY: {
-			fetchedData =
-				await queryWordForDictionaryResultFromFreeDictionaryApi(word);
+			fetchedData = queryWordForDictionaryResultFromFreeDictionaryApi(word);
 
 			break;
 		}
 
 		case URBAN_DICTIONARY: {
-			fetchedData = await queryWordForDictionaryResultFromUrbanDictionaryApi(
+			fetchedData = queryWordForDictionaryResultFromUrbanDictionaryApi(
 				word,
 				maxResults,
 			);
@@ -108,12 +106,17 @@ async function fetchFromApi(
 		}
 	}
 
-	if (fetchedData) {
-		// No need to await this since we can afford to
-		idb.set([cacheKey, { cachedOn: new Date(), data: fetchedData }]);
-	}
+	/** Start saving the fetched data */
+	const fetchedDataAfterSaving = fetchedData.then(async (data) => {
+		if (data) await idb.set([cacheKey, { cachedOn: new Date(), data }]);
 
-	return fetchedData;
+		return data;
+	});
+
+	/** Still serve the stale data while fetching to reduce perceptible lag */
+	if (cachedData) return cachedData.data;
+
+	return fetchedDataAfterSaving;
 }
 
 function isCachedEntryExpired(
