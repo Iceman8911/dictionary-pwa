@@ -16,16 +16,17 @@ describe("fetchDictionaryResult", () => {
 		// Make idb.get initially return null, simulating a cache miss
 		get.mockResolvedValue(null);
 
-		const WORD = "Cheese";
+		const WORDS = ["Cheese", "Cold-hearted", "API", "Grilled Cheese"] as const;
 
-		// This test will now hit the (mocked) network
-		const result = await fetchDictionaryResult({
-			word: WORD,
-		});
+		for (const word of WORDS) {
+			const result = await fetchDictionaryResult({
+				word: word,
+			});
 
-		expect(result).not.toBeNull();
-		expect(result?.name).toBe(WORD);
-		expect(set).toHaveBeenCalledTimes(1); // Ensure data was attempted to be cached
+			expect(result).not.toBeNull();
+			expect(result?.name).toBe(word);
+			expect(set).toHaveBeenCalledTimes(1); // Ensure data was attempted to be cached
+		}
 	});
 
 	it("should return cached data if available and not expired", async () => {
