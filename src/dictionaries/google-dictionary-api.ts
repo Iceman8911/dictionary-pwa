@@ -13,65 +13,75 @@ const LicenseSchema = v.object({
 	url: UrlString,
 });
 
-const ResponseSchema = v.pipe(
-	v.tuple([
-		v.pipe(
-			v.object({
-				/** The name of the word */
-				word: v.string(),
+const ResponseSchema = v.union([
+	v.pipe(
+		v.tuple([
+			v.pipe(
+				v.object({
+					/** The name of the word */
+					word: v.string(),
 
-				/** Generic IPA pronounciation */
-				phonetic: v.optional(IpaPhonetic),
+					/** Generic IPA pronounciation */
+					phonetic: v.optional(IpaPhonetic),
 
-				phonetics: v.array(
-					v.object({
-						/** Url to an mp3 pronounciation */
-						audio: v.union([UrlString, v.literal("")]),
+					phonetics: v.array(
+						v.object({
+							/** Url to an mp3 pronounciation */
+							audio: v.union([UrlString, v.literal("")]),
 
-						/** Url to it's wikimedia source */
-						sourceUrl: v.optional(UrlString),
+							/** Url to it's wikimedia source */
+							sourceUrl: v.optional(UrlString),
 
-						/** License data */
-						license: v.optional(LicenseSchema),
+							/** License data */
+							license: v.optional(LicenseSchema),
 
-						/** IPA pronounciation */
-						text: v.optional(IpaPhonetic),
-					}),
-				),
+							/** IPA pronounciation */
+							text: v.optional(IpaPhonetic),
+						}),
+					),
 
-				meanings: v.array(
-					v.object({
-						partOfSpeech: PartOfSpeech,
+					meanings: v.array(
+						v.object({
+							partOfSpeech: PartOfSpeech,
 
-						/** Each array element will have a seperate definition and maybe synonyms / antonyms that relate to that particular definition */
-						definitions: v.array(
-							v.object({
-								definition: v.string(),
+							/** Each array element will have a seperate definition and maybe synonyms / antonyms that relate to that particular definition */
+							definitions: v.array(
+								v.object({
+									definition: v.string(),
 
-								synonyms: StringArraySchema,
+									synonyms: StringArraySchema,
 
-								antonyms: StringArraySchema,
+									antonyms: StringArraySchema,
 
-								/** An example sentence that uses the `word` in particular */
-								example: v.optional(v.string()),
-							}),
-						),
+									/** An example sentence that uses the `word` in particular */
+									example: v.optional(v.string()),
+								}),
+							),
 
-						synonyms: StringArraySchema,
+							synonyms: StringArraySchema,
 
-						antonyms: StringArraySchema,
-					}),
-				),
+							antonyms: StringArraySchema,
+						}),
+					),
 
-				license: LicenseSchema,
+					license: LicenseSchema,
 
-				sourceUrls: v.array(UrlString),
-			}),
-			v.readonly(),
-		),
-	]),
-	v.readonly(),
-);
+					sourceUrls: v.array(UrlString),
+				}),
+				v.readonly(),
+			),
+		]),
+		v.readonly(),
+	),
+	// This will only be a regular object if no definitions were found
+	v.object({
+		title: v.literal("No Definitions Found"),
+
+		message: v.string(),
+
+		resolution: v.string(),
+	}),
+]);
 
 /** For some reason, it's an array of only one value :p */
 type ResponseOutput = v.InferOutput<typeof ResponseSchema>;
@@ -98,7 +108,7 @@ async function fetchResponse(word: string): Promise<ResponseOutput | []> {
 function convertResponseToDictionaryResult(
 	response: ResponseOutput | [],
 ): DictionaryWordResult | null {
-	if (!response[0]) return null;
+	if ("title" in response || !response[0]) return null;
 
 	const { meanings, phonetic, phonetics, word } = response[0];
 
