@@ -56,7 +56,7 @@ async function fetchFromApi(
 ): Promise<DictionaryWordResult | null> {
 	word = word.trim();
 
-	const cacheKey: DictionaryWordIndexeddbKey = `${api}-${word}`;
+	const cacheKey: DictionaryWordIndexeddbKey = `${api}-${word.toLocaleLowerCase()}`;
 
 	const cachedData = await idb.get(cacheKey);
 
