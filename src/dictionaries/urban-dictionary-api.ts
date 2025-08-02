@@ -132,10 +132,16 @@ function convertResponseToDictionaryResult(
 	const [definitions, examples] = data.reduce<
 		[DictionaryWordResult["definitions"], DictionaryWordResult["examples"]]
 	>(
-		(acc, { example, meaning }) => {
-			acc[0].push({ definition: meaning, partOfSpeech: null });
+		(acc, { example, meaning, contributor, date }) => {
+			acc[0].push({
+				definition: `“${meaning}”, by ${contributor} on ${date}`,
+				partOfSpeech: null,
+			});
 
-			acc[1].push({ example, partOfSpeech: null });
+			acc[1].push({
+				example: `“${example}”, by ${contributor} on ${date}`,
+				partOfSpeech: null,
+			});
 
 			return acc;
 		},
