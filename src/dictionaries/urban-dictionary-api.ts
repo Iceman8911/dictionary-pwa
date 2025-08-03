@@ -134,12 +134,12 @@ function convertResponseToDictionaryResult(
 	>(
 		(acc, { example, meaning, contributor, date }) => {
 			acc[0].push({
-				definition: `“${meaning}”, by ${contributor} on ${date}`,
+				definition: `“${meaning}”, by “${contributor}” on “${date}”`,
 				partOfSpeech: null,
 			});
 
 			acc[1].push({
-				example: `“${example}”, by ${contributor} on ${date}`,
+				example: `“${example}”, by “${contributor}” on “${date}”`,
 				partOfSpeech: null,
 			});
 
