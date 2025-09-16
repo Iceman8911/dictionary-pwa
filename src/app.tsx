@@ -68,7 +68,7 @@ export default function App() {
 			<Router
 				root={(props) => (
 					<>
-						<main class="h-[100vh] w-[100vw]">
+						<main class="h-screen w-screen">
 							<Header />
 
 							<ReloadPrompt />
