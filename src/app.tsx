@@ -68,7 +68,7 @@ export default function App() {
 			<Router
 				root={(props) => (
 					<>
-						<main class="h-screen w-screen">
+						<main class="h-screen w-screen overflow-auto">
 							<Header />
 
 							<ReloadPrompt />

@@ -1,5 +1,5 @@
 import { trackStore } from "@solid-primitives/deep";
-import { createEffect, For, Match, on, Switch } from "solid-js";
+import { createEffect, For, JSXElement, Match, on, Switch } from "solid-js";
 import { createStore, produce, type StoreSetter, unwrap } from "solid-js/store";
 import Tooltip from "~/components/tooltip";
 import { getNameOfDictionaryApi } from "~/dictionaries/dictionary";
@@ -37,7 +37,7 @@ export default function Settings() {
 		const alsoProvidesSuggestionsText = "Also provides suggestions" as const;
 
 		return (
-			<fieldset class="fieldset bg-base-200 border-base-300 rounded-box size-fit border p-4">
+			<fieldset class="fieldset bg-base-200 border-base-300 rounded-box size-fit border p-4 sm:w-68 lg:w-auto">
 				<legend class="fieldset-legend">Dictionaries To Use</legend>
 
 				<div class="grid gap-2 col-gap-4 grid-cols-1 md:grid-cols-2 size-fit">
@@ -64,7 +64,7 @@ export default function Settings() {
 								<Switch>
 									<Match when={val === URBAN_DICTIONARY}>
 										<Tooltip
-											info={`Enabling this may slow down the search. ${alsoProvidesSuggestionsText}`}
+											info={<div class="max-w-52">Enabling this may slow down the search. {alsoProvidesSuggestionsText}</div>}
 											class="size-4"
 											dir="right"
 										/>
@@ -72,7 +72,7 @@ export default function Settings() {
 
 									<Match when={val === DATAMUSE}>
 										<Tooltip
-											info={alsoProvidesSuggestionsText}
+											info={<div class="max-w-52">{alsoProvidesSuggestionsText}</div>}
 											class="size-4"
 											dir="right"
 										/>
@@ -109,7 +109,7 @@ export default function Settings() {
 					<p class="label text-base-content">
 						{prop.name}:{" "}
 						<span class="text-primary">{prop.valueString ?? prop.value}</span>{" "}
-						<Tooltip info={prop.tooltip} class="size-4" />
+            <Tooltip info={<div class="max-w-52">{prop.tooltip }</div>} class="size-4" />
 					</p>
 
 					<input
