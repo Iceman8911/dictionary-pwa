@@ -37,10 +37,10 @@ export default function Settings() {
 		const alsoProvidesSuggestionsText = "Also provides suggestions" as const;
 
 		return (
-			<fieldset class="fieldset bg-base-200 border-base-300 rounded-box size-fit border p-4 sm:w-68 lg:w-auto">
+			<fieldset class="fieldset bg-base-200 border-base-300 rounded-box size-fit border p-4 sm:w-68 md:min-w-fit">
 				<legend class="fieldset-legend">Dictionaries To Use</legend>
 
-				<div class="grid gap-2 col-gap-4 grid-cols-1 md:grid-cols-2 size-fit">
+				<div class="grid gap-2 col-gap-4 grid-cols-1 size-fit">
 					<For each={Object.values(DICTIONARY_API)}>
 						{(val) => (
 							<label class="label text-base-content">
@@ -82,7 +82,7 @@ export default function Settings() {
 								<a
 									href={val}
 									target="_blank"
-									class="link link-ghost overflow-hidden text-ellipsis"
+									class="link link-ghost truncate"
 								>
 									({val})
 								</a>
