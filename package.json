@@ -2,12 +2,12 @@
 	"name": "offline-dicitionary-pwa",
 	"type": "module",
 	"scripts": {
-		"dev": "vinxi dev",
+		"dev": "vinxi dev --port=3002",
 		"build": "vinxi build && node ./scripts/set-html-hash.mjs",
-		"start": "vinxi start",
-		"bun-dev": "bun --bun vinxi dev --port=3001",
-		"bun-build": "bun --bun vinxi build && bun --bun ./scripts/set-html-hash.mjs",
-		"bun-start": "bun --bun vinxi start --port=3001",
+		"start": "vinxi start --port=3002",
+		"bun-dev": "bun --bun dev",
+		"bun-build": "bun --bun build",
+		"bun-start": "bun --bun start",
 		"generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.png",
 		"test": "vitest"
 	},
