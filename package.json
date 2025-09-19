@@ -6,7 +6,7 @@
 		"build": "vinxi build && node ./scripts/set-html-hash.mjs",
 		"start": "vinxi start --port=3002",
 		"bun-dev": "bun --bun dev",
-		"bun-build": "bun --bun build",
+		"bun-build": "bun --bun run build",
 		"bun-start": "bun --bun start",
 		"generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.png",
 		"test": "vitest"
