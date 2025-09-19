@@ -40,7 +40,7 @@ export default function Settings() {
 			<fieldset class="fieldset bg-base-200 border-base-300 rounded-box size-fit border p-4 sm:w-68 md:min-w-fit">
 				<legend class="fieldset-legend">Dictionaries To Use</legend>
 
-				<div class="grid gap-2 col-gap-4 grid-cols-1 size-fit">
+				<div class="grid gap-2 grid-cols-2 size-fit">
 					<For each={Object.values(DICTIONARY_API)}>
 						{(val) => (
 							<label class="label text-base-content">
@@ -66,7 +66,6 @@ export default function Settings() {
 										<Tooltip
 											info={<div class="max-w-52">Enabling this may slow down the search. {alsoProvidesSuggestionsText}</div>}
 											class="size-4"
-											dir="right"
 										/>
 									</Match>
 
@@ -74,17 +73,16 @@ export default function Settings() {
 										<Tooltip
 											info={<div class="max-w-52">{alsoProvidesSuggestionsText}</div>}
 											class="size-4"
-											dir="right"
 										/>
 									</Match>
 								</Switch>
-								{getNameOfDictionaryApi(val)}{" "}
+								{" "}
 								<a
 									href={val}
 									target="_blank"
-									class="link link-ghost truncate"
+									class="link link-ghost overflow-x-auto"
 								>
-									({val})
+								{getNameOfDictionaryApi(val)}
 								</a>
 							</label>
 						)}
