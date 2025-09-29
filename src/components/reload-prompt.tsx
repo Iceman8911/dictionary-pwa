@@ -22,9 +22,9 @@ const ReloadPrompt: Component = () => {
 	};
 
 	return (
-		<div class="p-0 m-0 size-0">
+		<div class="m-0 size-0 p-0">
 			<Show when={offlineReady() || needRefresh()}>
-				<div class="fixed right-0 top-0 m-4 p-3 border border-primary rounded-field z-10 text-left shadow bg-base-300">
+				<div class="fixed top-0 right-0 z-10 m-4 rounded-field border border-primary bg-base-300 p-3 text-left shadow">
 					<div class="mb-2">
 						<Show
 							fallback={

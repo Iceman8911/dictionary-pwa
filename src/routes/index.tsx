@@ -59,7 +59,7 @@ export default function Home() {
 	};
 
 	return (
-		<div class="grid grid-cols-2 grid-rows-[3rem_3rem_1fr] md:grid-rows-[3rem_1fr] gap-4 h-[85%] px-4 pb-4">
+		<div class="grid h-[85%] grid-cols-2 grid-rows-[3rem_3rem_1fr] gap-4 px-4 pb-4 md:grid-rows-[3rem_1fr]">
 			<SearchBar
 				searchFunction={searchWord}
 				searchInput={searchInput()}
@@ -104,7 +104,7 @@ function SearchBar(prop: {
 	};
 
 	return (
-		<label class="input input-primary col-span-2 justify-self-center self-center w-4/5 md:w-3/5">
+		<label class="input input-primary col-span-2 w-4/5 self-center justify-self-center md:w-3/5">
 			<SearchIcon class="h-[75%] w-auto text-primary" strokeWidth={1} />
 
 			<input
@@ -157,7 +157,7 @@ function SearchResults(prop: {
 				<LoadingSpinner />
 			</Show>
 
-			<ul class="menu menu-horizontal md:menu-vertical size-full md:text-lg flex-nowrap overflow-x-auto">
+			<ul class="menu menu-horizontal md:menu-vertical size-full flex-nowrap overflow-x-auto md:text-lg">
 				<For each={searchResultList()} fallback={<Placeholder />}>
 					{(word, index) => (
 						<li>
@@ -231,7 +231,7 @@ function SearchedWordInfo(prop: {
 						<>
 							<span>Examples:</span>
 
-							<ul class="mt-1  flex flex-col gap-1">
+							<ul class="mt-1 flex flex-col gap-1">
 								<For each={examples()}>
 									{({ example, partOfSpeech }, index) => {
 										// Highlight the specific word in the example, but extracting it from the string and adding the word manually
@@ -359,7 +359,7 @@ function SearchedWordInfo(prop: {
 
 			<Show when={apiResultToView()} fallback={<Placeholder />}>
 				{(val) => (
-					<div class="size-full overflow-y-auto flex flex-col gap-3 p-4 [&_span]:font-semibold">
+					<div class="flex size-full flex-col gap-3 overflow-y-auto p-4 [&_span]:font-semibold">
 						<div>
 							<span>Sourced From:</span>{" "}
 							<span class="text-primary">
@@ -451,7 +451,7 @@ function SearchedWordInfo(prop: {
 function SharedContainer(prop: { class?: string; children: JSX.Element }) {
 	return (
 		<div
-			class={`relative bg-base-200 rounded-box flex justify-center items-center overflow-hidden ${prop.class}`}
+			class={`relative flex items-center justify-center overflow-hidden rounded-box bg-base-200 ${prop.class}`}
 		>
 			{prop.children}
 		</div>

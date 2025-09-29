@@ -9,6 +9,10 @@
 		"bun-build": "bun --bun run build",
 		"bun-start": "bun --bun start",
 		"generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.png",
+		"format": "biome format .",
+		"lint": "biome check .",
+		"format:fix": "biome format . --write",
+		"lint:fix": "biome check . --write",
 		"test": "vitest"
 	},
 	"dependencies": {

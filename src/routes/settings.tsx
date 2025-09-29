@@ -37,10 +37,10 @@ export default function Settings() {
 		const alsoProvidesSuggestionsText = "Also provides suggestions" as const;
 
 		return (
-			<fieldset class="fieldset bg-base-200 border-base-300 rounded-box size-fit border p-4 sm:w-68 md:min-w-fit">
+			<fieldset class="fieldset size-fit rounded-box border border-base-300 bg-base-200 p-4 sm:w-68 md:min-w-fit">
 				<legend class="fieldset-legend">Dictionaries To Use</legend>
 
-				<div class="grid gap-2 grid-cols-2 size-fit">
+				<div class="grid size-fit grid-cols-2 gap-2">
 					<For each={Object.values(DICTIONARY_API)}>
 						{(val) => (
 							<label class="label text-base-content">
@@ -64,25 +64,33 @@ export default function Settings() {
 								<Switch>
 									<Match when={val === URBAN_DICTIONARY}>
 										<Tooltip
-											info={<div class="max-w-52">Enabling this may slow down the search. {alsoProvidesSuggestionsText}</div>}
+											info={
+												<div class="max-w-52">
+													Enabling this may slow down the search.{" "}
+													{alsoProvidesSuggestionsText}
+												</div>
+											}
 											class="size-4"
 										/>
 									</Match>
 
 									<Match when={val === DATAMUSE}>
 										<Tooltip
-											info={<div class="max-w-52">{alsoProvidesSuggestionsText}</div>}
+											info={
+												<div class="max-w-52">
+													{alsoProvidesSuggestionsText}
+												</div>
+											}
 											class="size-4"
 										/>
 									</Match>
-								</Switch>
-								{" "}
+								</Switch>{" "}
 								<a
 									href={val}
 									target="_blank"
 									class="link link-ghost overflow-x-auto"
 								>
-								{getNameOfDictionaryApi(val)}
+									{getNameOfDictionaryApi(val)}
 								</a>
 							</label>
 						)}
@@ -107,7 +115,10 @@ export default function Settings() {
 					<p class="label text-base-content">
 						{prop.name}:{" "}
 						<span class="text-primary">{prop.valueString ?? prop.value}</span>{" "}
-            <Tooltip info={<div class="max-w-52">{prop.tooltip }</div>} class="size-4" />
+						<Tooltip
+							info={<div class="max-w-52">{prop.tooltip}</div>}
+							class="size-4"
+						/>
 					</p>
 
 					<input
@@ -115,7 +126,7 @@ export default function Settings() {
 						min={prop.min}
 						max={prop.max}
 						value={prop.value}
-						class="range range-sm w-3xs md:w-xs mb-2"
+						class="range range-sm mb-2 w-3xs md:w-xs"
 						onInput={({ target: { value } }) => prop.onInput(Number(value))}
 					/>
 				</>
@@ -123,7 +134,7 @@ export default function Settings() {
 		}
 
 		return (
-			<fieldset class="fieldset bg-base-200 border-base-300 rounded-box size-fit border p-4">
+			<fieldset class="fieldset size-fit rounded-box border border-base-300 bg-base-200 p-4">
 				<legend class="fieldset-legend">Cache Settings</legend>
 
 				<_InputAndRange
@@ -183,7 +194,7 @@ export default function Settings() {
 
 	function SaveAndResetButtons() {
 		return (
-			<div class="flex gap-4 absolute bottom-[4vh] left-[6vw]">
+			<div class="absolute bottom-[4vh] left-[6vw] flex gap-4">
 				<button
 					type="button"
 					class="btn btn-secondary"
@@ -211,7 +222,7 @@ export default function Settings() {
 
 	return (
 		<form
-			class="p-4 pt-0 md:pt-4 h-[85%] relative flex flex-col flex-wrap gap-4"
+			class="relative flex h-[85%] flex-col flex-wrap gap-4 p-4 pt-0 md:pt-4"
 			onSubmit={(e) => {
 				e.preventDefault();
 

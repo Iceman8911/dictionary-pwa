@@ -221,13 +221,13 @@ function getNameOfDictionaryApi(api: DictionaryApis) {
 
 async function getSearchSuggestions(
 	input: string,
-	maxResults = 10
+	maxResults = 10,
 ): Promise<ReadonlyArray<string>> {
 	const suggestionArrayPromises: Array<Promise<ReadonlyArray<string>>> = [];
 
 	if (gSettings.dictionaries.has(DATAMUSE))
 		suggestionArrayPromises.push(
-			getSearchSuggestionsFromDatamuseApi({ word: input,maxResults }),
+			getSearchSuggestionsFromDatamuseApi({ word: input, maxResults }),
 		);
 
 	if (gSettings.dictionaries.has(URBAN_DICTIONARY))
@@ -244,13 +244,15 @@ async function getSearchSuggestions(
 	}, []);
 
 	return [
-		...new Set(fulfilledSuggestionArray.reduce<string[]>((acc, val)=>{
-		if (acc.length >= maxResults) return acc
+		...new Set(
+			fulfilledSuggestionArray.reduce<string[]>((acc, val) => {
+				if (acc.length >= maxResults) return acc;
 
-		acc.push(val.toLocaleLowerCase())
+				acc.push(val.toLocaleLowerCase());
 
-		return acc
-		}, []))
+				return acc;
+			}, []),
+		),
 	];
 }
 

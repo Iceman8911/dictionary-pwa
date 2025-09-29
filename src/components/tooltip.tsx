@@ -1,5 +1,5 @@
 import InfoIcon from "lucide-solid/icons/info";
-import { JSXElement } from "solid-js";
+import type { JSXElement } from "solid-js";
 
 /** Simple info icon that can be hovered over to display extra information */
 export default function Tooltip(prop: {
@@ -18,10 +18,8 @@ export default function Tooltip(prop: {
 	} as const;
 
 	return (
-		<div
-			class={`tooltip ${prop.dir ? directions[prop.dir] : ""}`}
-		>
-      <div class="tooltip-content">{ prop.info}</div>
+		<div class={`tooltip ${prop.dir ? directions[prop.dir] : ""}`}>
+			<div class="tooltip-content">{prop.info}</div>
 
 			<InfoIcon class={prop.class} />
 		</div>
