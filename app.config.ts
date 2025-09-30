@@ -57,7 +57,7 @@ export default defineConfig({
 						{
 							handler: "StaleWhileRevalidate",
 
-							urlPattern: ({ url: { pathname } }) => pathname.endsWith("mp3"),
+							urlPattern: ({ request }) => request.destination === "audio",
 
 							options: {
 								cacheName: "audio-pronounciations",
@@ -74,6 +74,16 @@ export default defineConfig({
 
 								cacheableResponse: {
 									statuses: [0, 200],
+								},
+							},
+						},
+						{
+							urlPattern: ({ request }) => request.destination === "image",
+							handler: "StaleWhileRevalidate",
+							options: {
+								cacheName: "images-cache",
+								expiration: {
+									maxEntries: 20,
 								},
 							},
 						},
@@ -121,7 +131,6 @@ export default defineConfig({
 
 		build: {
 			minify: "terser",
-
 			terserOptions: {
 				compress: {
 					drop_console: true,
@@ -135,7 +144,7 @@ export default defineConfig({
 	server: {
 		preset: "cloudflare-pages",
 
-		prerender: { crawlLinks: true },
+		prerender: { crawlLinks: true, routes: ["/", "/settings", "/about"] },
 
 		cloudflare: {
 			wrangler: {
@@ -168,5 +177,5 @@ export default defineConfig({
 		},
 	},
 
-	ssr: false,
+	// ssr: false,
 });
