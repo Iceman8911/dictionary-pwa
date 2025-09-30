@@ -128,17 +128,6 @@ export default defineConfig({
 				},
 			}),
 		],
-
-		build: {
-			minify: "terser",
-			terserOptions: {
-				compress: {
-					drop_console: true,
-
-					drop_debugger: true,
-				},
-			},
-		},
 	},
 
 	server: {
@@ -157,7 +146,7 @@ export default defineConfig({
 			deployConfig: true,
 		},
 
-		compressPublicAssets: { gzip: true, brotli: true },
+		compressPublicAssets: true,
 
 		compatibilityDate: { cloudflare: "latest", default: "latest" },
 
