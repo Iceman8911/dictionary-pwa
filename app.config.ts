@@ -151,7 +151,7 @@ export default defineConfig({
 		compatibilityDate: { cloudflare: "latest", default: "latest" },
 
 		routeRules: {
-			"index.html": {
+			"**/*.html": {
 				headers: {
 					"cache-control": "public, max-age=0, must-revalidate",
 				},
