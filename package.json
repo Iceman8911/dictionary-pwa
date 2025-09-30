@@ -8,6 +8,8 @@
 		"bun-dev": "bun --bun dev",
 		"bun-build": "bun --bun run build",
 		"bun-start": "bun --bun start",
+		"start:cloudflare": "npx wrangler --cwd dist pages dev",
+		"start:cloudflare:bun": "bunx wrangler --cwd dist pages dev",
 		"generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.png",
 		"format": "biome format .",
 		"lint": "biome check .",
