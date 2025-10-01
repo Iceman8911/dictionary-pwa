@@ -19,7 +19,8 @@ export default defineConfig({
 
 				workbox: {
 					globDirectory: OUTPUT_DIR,
-					globPatterns: ["**/*.{js,css,html,ico,png,webp,svg,woff2,woff}"],globIgnores:["**/_server/**", "**/_worker.js/__"],
+					globPatterns: ["**/*.{js,css,html,ico,png,webp,svg,woff2,woff}"],
+					globIgnores: ["**/_server/**", "**/_worker.js/__"],
 					modifyURLPrefix: {
 						"": "../",
 					},
@@ -127,30 +128,30 @@ export default defineConfig({
 					theme_color: "#00000000",
 					icons: [
 						{
-							src: "/pwa-64x64.png",
+							src: "/pwa-64x64.webp",
 							sizes: "64x64",
-							type: "image/png",
+							type: "image/webp",
 						},
 						{
-							src: "/pwa-192x192.png",
+							src: "/pwa-192x192.webp",
 							sizes: "192x192",
-							type: "image/png",
+							type: "image/webp",
 						},
 						{
-							src: "/pwa-512x512.png",
+							src: "/pwa-512x512.webp",
 							sizes: "512x512",
-							type: "image/png",
+							type: "image/webp",
 						},
 						{
-							src: "/maskable-icon-512x512.png",
+							src: "/maskable-icon-512x512.webp",
 							sizes: "512x512",
-							type: "image/png",
+							type: "image/webp",
 							purpose: "maskable",
 						},
 						{
-							src: "/maskable-icon-512x512.png",
+							src: "/maskable-icon-512x512.webp",
 							sizes: "512x512",
-							type: "image/png",
+							type: "image/webp",
 							purpose: "any",
 						},
 					],

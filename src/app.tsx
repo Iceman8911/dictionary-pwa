@@ -61,9 +61,9 @@ export default function App() {
 
 			<Link rel="icon" href="/favicon.ico" sizes="48x48" />
 
-			<Link rel="icon" href="/logo.svg" sizes="any" type="image/svg+xml" />
+			<Link rel="icon" href="/logo.webp" sizes="any" type="image/webp" />
 
-			<Link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+			<Link rel="apple-touch-icon" href="/apple-touch-icon-180x180.webp" />
 
 			<Router
 				root={(props) => (

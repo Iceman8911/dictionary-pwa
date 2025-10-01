@@ -5,7 +5,7 @@ import SettingsIcon from "lucide-solid/icons/settings";
 export default function Header() {
 	return (
 		<h1 class="mb-4 flex h-20 items-center justify-center gap-2 font-bold text-3xl">
-			<img class="h-10 w-auto" src="/pwa-64x64.png" alt="Dictionary Logo" />
+			<img class="h-10 w-auto" src="/pwa-64x64.webp" alt="Dictionary Logo" />
 
 			<A href="/" class="link mr-8" end>
 				Lexi Cache
