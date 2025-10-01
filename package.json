@@ -3,7 +3,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vinxi dev --port=3002",
-		"build": "vinxi build && node ./scripts/set-html-hash.mjs",
+		"build": "vinxi build",
+		"postbuild": "vinxi build",
 		"start": "vinxi start --port=3002",
 		"bun-dev": "bun --bun dev",
 		"bun-build": "bun --bun run build",

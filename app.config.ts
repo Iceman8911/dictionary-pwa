@@ -1,6 +1,7 @@
 import { defineConfig } from "@solidjs/start/config";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
+const OUTPUT_DIR = "dist";
 
 export default defineConfig({
 	vite: {
@@ -16,18 +17,41 @@ export default defineConfig({
 
 				scope: "/",
 
-				// pwaAssets: { image: "/logo.png" },
-
 				workbox: {
-					globPatterns: ["**/*"],
+					globDirectory: OUTPUT_DIR,
+					globPatterns: ["**/*.{js,css,html,ico,png,webp,svg,woff2,woff}"],globIgnores:["**/_server/**", "**/_worker.js/__"],
+					modifyURLPrefix: {
+						"": "../",
+					},
 
-					// Explicitly add the root path to ensure index.html is precached. The revision value here will be changed by a script later.
-					additionalManifestEntries: [
-						{ url: "index.html", revision: "REV_INDEX_HTML_TO_CHANGE" },
+					// Serve index.html for navigation requests (SPA) when offline / network fails
+					navigateFallback: "/index.html",
+
+					// Denylist: do not treat asset or API requests as navigation fallbacks
+					// (prevents binary/file requests or /api calls from returning index.html)
+					navigateFallbackDenylist: [
+						// asset requests (anything with a file extension)
+						new RegExp("\\.[^/]+$"),
+						// API calls
+						new RegExp("^/api"),
 					],
 
 					/** Cache the API calls for suggestions*/
 					runtimeCaching: [
+						// {
+						// 	urlPattern: ({ request }) => request.mode === "navigate",
+						// 	handler: "NetworkFirst",
+						// 	options: {
+						// 		cacheName: "html-pages",
+						// 		expiration: {
+						// 			maxEntries: 50,
+						// 			// maxAgeSeconds: 24 * 60 * 60  // 1 day
+						// 		},
+						// 		cacheableResponse: {
+						// 			statuses: [0, 200],
+						// 		},
+						// 	},
+						// },
 						{
 							urlPattern: ({ url: { origin, pathname } }) =>
 								(origin === "https://api.datamuse.com" &&
@@ -78,16 +102,22 @@ export default defineConfig({
 							},
 						},
 						{
-							urlPattern: ({ request }) => request.destination === "image",
+							urlPattern: ({ request }) =>
+								request.destination === "script" ||
+								request.destination === "style" ||
+								request.destination === "image" ||
+								request.destination === "font",
 							handler: "StaleWhileRevalidate",
 							options: {
-								cacheName: "images-cache",
+								cacheName: "static-resources",
 								expiration: {
-									maxEntries: 20,
+									maxEntries: 100,
+									// maxAgeSeconds: 7 * 24 * 60 * 60  // 1 week
 								},
 							},
 						},
 					],
+					cleanupOutdatedCaches: true,
 				},
 
 				manifest: {
@@ -166,5 +196,5 @@ export default defineConfig({
 		},
 	},
 
-	// ssr: false,
+	ssr: false,
 });
