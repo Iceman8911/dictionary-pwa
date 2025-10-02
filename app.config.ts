@@ -3,6 +3,8 @@ import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 const OUTPUT_DIR = "dist";
 
+const isSSRBuild = process.env.SSR === "true"
+
 export default defineConfig({
 	vite: {
 		plugins: [
@@ -24,8 +26,7 @@ export default defineConfig({
 					modifyURLPrefix: {
 						"": "../",
 					},
-
-					// Serve index.html for navigation requests (SPA) when offline / network fails
+					...(isSSRBuild ? {} :{// Serve index.html for navigation requests (SPA) when offline / network fails
 					navigateFallback: "/index.html",
 
 					// Denylist: do not treat asset or API requests as navigation fallbacks
@@ -35,24 +36,26 @@ export default defineConfig({
 						new RegExp("\\.[^/]+$"),
 						// API calls
 						new RegExp("^/api"),
-					],
+					],}),
+
+
 
 					/** Cache the API calls for suggestions*/
 					runtimeCaching: [
-						// {
-						// 	urlPattern: ({ request }) => request.mode === "navigate",
-						// 	handler: "NetworkFirst",
-						// 	options: {
-						// 		cacheName: "html-pages",
-						// 		expiration: {
-						// 			maxEntries: 50,
-						// 			// maxAgeSeconds: 24 * 60 * 60  // 1 day
-						// 		},
-						// 		cacheableResponse: {
-						// 			statuses: [0, 200],
-						// 		},
-						// 	},
-						// },
+						{
+							urlPattern: ({ request }) => request.mode === "navigate",
+							handler: "NetworkFirst",
+							options: {
+								cacheName: "html-pages",
+								// expiration: {
+								// 	maxEntries: 50,
+								// 	maxAgeSeconds: 24 * 60 * 60  // 1 day
+								// },
+								cacheableResponse: {
+									statuses: [0, 200],
+								},
+							},
+						},
 						{
 							urlPattern: ({ url: { origin, pathname } }) =>
 								(origin === "https://api.datamuse.com" &&
@@ -197,5 +200,5 @@ export default defineConfig({
 		},
 	},
 
-	ssr: false,
+	ssr: isSSRBuild ?true:false,
 });
