@@ -15,6 +15,7 @@ export default function Settings() {
 		cloneStore(gSettings),
 	);
 
+
 	const setTempSettings = (params: StoreSetter<GlobalSettings, []>) => {
 		_setTempSettings(params);
 
@@ -111,10 +112,10 @@ export default function Settings() {
 			onInput: (inputVal: number) => void;
 		}) {
 			return (
-				<>
-					<p class="label text-base-content">
-						{prop.name}:{" "}
-						<span class="text-primary">{prop.valueString ?? prop.value}</span>{" "}
+				<div class="flex gap-2 flex-col">
+					<p class="label text-base-content space-x-1">
+						{prop.name}:
+						<span class="text-primary">{prop.valueString ?? prop.value}</span>
 						<Tooltip
 							info={<div class="max-w-52">{prop.tooltip}</div>}
 							class="size-4"
@@ -129,7 +130,7 @@ export default function Settings() {
 						class="range range-sm mb-2 w-3xs md:w-xs"
 						onInput={({ target: { value } }) => prop.onInput(Number(value))}
 					/>
-				</>
+				</div>
 			);
 		}
 

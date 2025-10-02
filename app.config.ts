@@ -3,7 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 const OUTPUT_DIR = "dist";
 
-const isSSRBuild = process.env.SSR === "true"
+const isSSRBuild = process.env.SSR === "true";
 
 export default defineConfig({
 	vite: {
@@ -13,35 +13,22 @@ export default defineConfig({
 			VitePWA({
 				registerType: "prompt",
 
-				// devOptions: {
-				// 	enabled: true,
-				// },
-
 				scope: "/",
 
 				workbox: {
 					globDirectory: OUTPUT_DIR,
+
 					globPatterns: ["**/*.{js,css,html,ico,png,webp,svg,woff2,woff}"],
-					globIgnores: ["**/_server/**", "**/_worker.js/__"],
+
+					globIgnores: ["**/_server/**", "**/_worker.js/**"],
+
 					modifyURLPrefix: {
 						"": "../",
 					},
-					...(isSSRBuild ? {} :{// Serve index.html for navigation requests (SPA) when offline / network fails
-					navigateFallback: "/index.html",
-
-					// Denylist: do not treat asset or API requests as navigation fallbacks
-					// (prevents binary/file requests or /api calls from returning index.html)
-					navigateFallbackDenylist: [
-						// asset requests (anything with a file extension)
-						new RegExp("\\.[^/]+$"),
-						// API calls
-						new RegExp("^/api"),
-					],}),
-
-
 
 					/** Cache the API calls for suggestions*/
 					runtimeCaching: [
+					// So ssr'd pages get cached
 						{
 							urlPattern: ({ request }) => request.mode === "navigate",
 							handler: "NetworkFirst",
@@ -107,8 +94,6 @@ export default defineConfig({
 						},
 						{
 							urlPattern: ({ request }) =>
-								request.destination === "script" ||
-								request.destination === "style" ||
 								request.destination === "image" ||
 								request.destination === "font",
 							handler: "StaleWhileRevalidate",
@@ -200,5 +185,5 @@ export default defineConfig({
 		},
 	},
 
-	ssr: isSSRBuild ?true:false,
+	ssr: isSSRBuild ? true : false,
 });
