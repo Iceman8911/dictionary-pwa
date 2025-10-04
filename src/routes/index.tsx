@@ -144,10 +144,11 @@ function SearchBar(prop: {
 			<summary class="list-none">
 				<label class="input input-primary w-full">
 					<SearchIcon
-						class="h-[75%] w-auto text-primary"
-						strokeWidth={1}
+						class="btn btn-primary btn-circle btn-soft h-7/10 w-auto p-0.5"
+						strokeWidth={1.5}
 						onClick={cleanInputAndSearch}
 					/>
+
 					<input
 						type="search"
 						placeholder="Search for anything..."
