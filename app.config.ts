@@ -1,10 +1,13 @@
 import { defineConfig } from "@solidjs/start/config";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
+
+/** Set this to whatever the build output folder is */
 const OUTPUT_DIR = "dist";
 
 const isSSRBuild = process.env.SSR === "true";
 
+// The build script has to be called twice, since the first time, the `OUTPUT_DIR` folder will not be populated with the necessary files
 export default defineConfig({
 	vite: {
 		plugins: [
@@ -13,31 +16,38 @@ export default defineConfig({
 			VitePWA({
 				registerType: "prompt",
 
+				// So the service worker can access the root of the build folder instead of `/_build/`. This requires a header to actually have the required effect though
 				scope: "/",
 
 				workbox: {
+					// Explicitly define the path for workbox to search for cacheable assets so that `public` assets and html files are visible
 					globDirectory: OUTPUT_DIR,
 
+					// Regular stuff you want to precache
 					globPatterns: ["**/*.{js,css,html,ico,png,webp,svg,woff2,woff}"],
 
+					// Skip server and worker stuff since they're server stuff
 					globIgnores: ["**/_server/**", "**/_worker.js/**"],
 
+					// Since the service worker gets tossed into a nested `/_build/`, we have to explicitly prepend all precache urls so the files can actually be found in practice. (because every network request the worker makes will have `/_build/` prepended to them in practice anyway)
 					modifyURLPrefix: {
 						"": "../",
 					},
 
-					/** Cache the API calls for suggestions*/
+					// For cases where you want to serve a default page when navigating to an uncached page. Not really useful for SSR
+					...(isSSRBuild
+						? { navigateFallback: null }
+						: { navigateFallback: "../index.html" }),
+
+					// navigateFallbackDenylist: [/^\/api/],
+
 					runtimeCaching: [
-					// So ssr'd pages get cached
+						// So ssr'd pages get cached upon navigation
 						{
-							urlPattern: ({ request }) => request.mode === "navigate",
+							urlPattern: ({ request }) => request.destination === "document",
 							handler: "NetworkFirst",
 							options: {
 								cacheName: "html-pages",
-								// expiration: {
-								// 	maxEntries: 50,
-								// 	maxAgeSeconds: 24 * 60 * 60  // 1 day
-								// },
 								cacheableResponse: {
 									statuses: [0, 200],
 								},
@@ -51,10 +61,8 @@ export default defineConfig({
 									pathname === "/v0/autocomplete-extra"),
 
 							handler: "StaleWhileRevalidate",
-
 							options: {
 								cacheName: "datamuse-api-calls",
-
 								expiration: {
 									// On average, there will be 3 suggestion api calls per word, and this should cache up to a 100 word suggestions, give or take
 									maxEntries: 310,
@@ -63,7 +71,6 @@ export default defineConfig({
 
 									purgeOnQuotaError: true,
 								},
-
 								cacheableResponse: {
 									statuses: [0, 200],
 								},
@@ -71,12 +78,9 @@ export default defineConfig({
 						},
 						{
 							handler: "StaleWhileRevalidate",
-
-							urlPattern: ({ request }) => request.destination === "audio",
-
+							urlPattern: /\.(?:mp3|wav|ogg)$/i,
 							options: {
 								cacheName: "audio-pronounciations",
-
 								expiration: {
 									/** On average, each audio will be ~15KB and I don't wish to go too far beyond ~1MB */
 									maxEntries: 70,
@@ -86,26 +90,27 @@ export default defineConfig({
 
 									purgeOnQuotaError: true,
 								},
-
 								cacheableResponse: {
 									statuses: [0, 200],
 								},
 							},
 						},
 						{
-							urlPattern: ({ request }) =>
-								request.destination === "image" ||
-								request.destination === "font",
+							urlPattern: /\.(?:webp|png|jpg|jpeg|svg|woff2|woff)$/i,
 							handler: "StaleWhileRevalidate",
 							options: {
 								cacheName: "static-resources",
 								expiration: {
 									maxEntries: 100,
-									// maxAgeSeconds: 7 * 24 * 60 * 60  // 1 week
 								},
 							},
 						},
 					],
+
+					// For some reason, `runtimeCaching` is ignored unless these 2 are set
+					skipWaiting: true,
+					clientsClaim: true,
+
 					cleanupOutdatedCaches: true,
 				},
 
@@ -152,7 +157,7 @@ export default defineConfig({
 	server: {
 		preset: "cloudflare-pages",
 
-		prerender: { crawlLinks: true, routes: ["/", "/settings", "/about"] },
+		// prerender: { crawlLinks: true, routes: ["/", "/settings", "/about"] },
 
 		cloudflare: {
 			wrangler: {
@@ -170,13 +175,15 @@ export default defineConfig({
 		compatibilityDate: { cloudflare: "latest", default: "latest" },
 
 		routeRules: {
+			// Prevent all route html files from getting stale
 			"**/*.html": {
 				headers: {
 					"cache-control": "public, max-age=0, must-revalidate",
 				},
 			},
 
-			"_build/sw.js": {
+			// Give the service worker the required header so it can increase it's `scope`
+			"/_build/sw.js": {
 				headers: {
 					"cache-control": "public, max-age=0, must-revalidate",
 					"service-worker-allowed": "/",
@@ -185,5 +192,5 @@ export default defineConfig({
 		},
 	},
 
-	ssr: isSSRBuild ? true : false,
+	ssr: isSSRBuild,
 });
