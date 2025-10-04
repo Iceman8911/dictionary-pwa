@@ -1,7 +1,6 @@
 import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
 import {
-	createEffect,
 	createMemo,
 	createSignal,
 	For,
@@ -100,10 +99,10 @@ function SearchBar(prop: {
 		{ initialValue: [] },
 	);
 
-	const cleanInputAndSearch = () => {
+	const cleanInputAndSearch = async () => {
 		prop.searchInputSetter((oldVal) => oldVal.trim());
 
-		prop.searchFunction(prop.searchInput);
+		await prop.searchFunction(prop.searchInput);
 	};
 
 	const Fallback = (prop: { children: string }) => {
@@ -116,30 +115,23 @@ function SearchBar(prop: {
 
 	const [showSuggestions, setShowSuggestions] = createSignal(false);
 
-	let detailsRef: HTMLDetailsElement | undefined;
-
-	// Handle click outside to close suggestions
-	createEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (!detailsRef?.contains(event.target as Node)) {
-				setShowSuggestions(false);
-			}
-		};
-
-		if (showSuggestions()) {
-			document.addEventListener("click", handleClickOutside);
-		}
-
-		onCleanup(() => {
-			document.removeEventListener("click", handleClickOutside);
-		});
-	});
-
 	return (
 		<details
 			class="dropdown col-span-2 w-4/5 self-center justify-self-center md:w-3/5"
 			open={showSuggestions()}
-			ref={detailsRef}
+			ref={(ref) => {
+				const handleClickOutside = (event: MouseEvent) => {
+					if (!ref.contains(event.target as Node)) {
+						setShowSuggestions(false);
+					}
+				};
+
+				document.addEventListener("click", handleClickOutside);
+
+				onCleanup(() => {
+					document.removeEventListener("click", handleClickOutside);
+				});
+			}}
 		>
 			<summary class="list-none">
 				<label class="input input-primary w-full">
@@ -157,12 +149,12 @@ function SearchBar(prop: {
 							setShowSuggestions(true);
 							prop.searchInputSetter(value);
 						}}
-						onKeyUp={({ key }) => {
+						onKeyUp={async ({ key }) => {
 							setShowSuggestions(true);
 							if (key === "Enter") {
-								cleanInputAndSearch();
-
 								setShowSuggestions(false);
+
+								await cleanInputAndSearch();
 							}
 						}}
 						onPointerUp={() => setShowSuggestions(true)}
@@ -185,10 +177,10 @@ function SearchBar(prop: {
 								<li>
 									<button
 										type="button"
-										onClick={() => {
-											prop.searchInputSetter(word());
-											cleanInputAndSearch();
+										onClick={async () => {
 											setShowSuggestions(false);
+											prop.searchInputSetter(word());
+											await cleanInputAndSearch();
 										}}
 									>
 										{word()}
