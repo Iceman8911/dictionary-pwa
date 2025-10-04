@@ -171,7 +171,7 @@ function SearchBar(prop: {
 			</summary>
 
 			{/* Dropdown */}
-			<ul class="menu dropdown-content z-1 w-full rounded-box border border-primary bg-base-100 p-2 shadow-sm">
+			<ul class="menu dropdown-content z-1 mt-1 w-full rounded-box border border-primary bg-base-100 p-2 shadow-sm">
 				<Suspense fallback={<Fallback>Loading...</Fallback>}>
 					<Show
 						when={prop.searchInput}
