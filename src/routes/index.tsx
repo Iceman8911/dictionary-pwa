@@ -1,10 +1,13 @@
 import { createAsync } from "@solidjs/router";
 import SearchIcon from "lucide-solid/icons/search";
 import {
+	createEffect,
 	createMemo,
 	createSignal,
 	For,
+	Index,
 	type JSX,
+	onCleanup,
 	type Setter,
 	Show,
 	Suspense,
@@ -20,7 +23,6 @@ import { DICTIONARY_API } from "~/shared/enums";
 import { gSettings } from "~/shared/store";
 import type { DictionaryWordResult } from "~/types/dictionary";
 import { capitalizeString } from "~/utils/humanify";
-import { generateUUID } from "~/utils/other";
 
 type DictionaryWordResultCollection = Map<DICTIONARY_API, DictionaryWordResult>;
 
@@ -88,14 +90,15 @@ function SearchBar(prop: {
 	searchInput: string;
 	searchInputSetter: Setter<string>;
 }) {
-	const DATALIST_ID = generateUUID();
+	const suggestions = createAsync(
+		async () => {
+			if (prop.searchInput.length > 2)
+				return getSearchSuggestions(prop.searchInput);
 
-	const suggestions = createAsync(() => {
-		if (prop.searchInput.length > 2)
-			return getSearchSuggestions(prop.searchInput);
-
-		return Promise.resolve([]);
-	});
+			return [];
+		},
+		{ initialValue: [] },
+	);
 
 	const cleanInputAndSearch = () => {
 		prop.searchInputSetter((oldVal) => oldVal.trim());
@@ -103,32 +106,99 @@ function SearchBar(prop: {
 		prop.searchFunction(prop.searchInput);
 	};
 
+	const Fallback = (prop: { children: string }) => {
+		return (
+			<li class="italic">
+				<div>{prop.children}</div>
+			</li>
+		);
+	};
+
+	const [showSuggestions, setShowSuggestions] = createSignal(false);
+
+	let detailsRef: HTMLDetailsElement | undefined;
+
+	// Handle click outside to close suggestions
+	createEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (!detailsRef?.contains(event.target as Node)) {
+				setShowSuggestions(false);
+			}
+		};
+
+		if (showSuggestions()) {
+			document.addEventListener("click", handleClickOutside);
+		}
+
+		onCleanup(() => {
+			document.removeEventListener("click", handleClickOutside);
+		});
+	});
+
 	return (
-		<label class="input input-primary col-span-2 w-4/5 self-center justify-self-center md:w-3/5">
-			<SearchIcon class="h-[75%] w-auto text-primary" strokeWidth={1} />
+		<details
+			class="dropdown col-span-2 w-4/5 self-center justify-self-center md:w-3/5"
+			open={showSuggestions()}
+			ref={detailsRef}
+		>
+			<summary class="list-none">
+				<label class="input input-primary w-full">
+					<SearchIcon
+						class="h-[75%] w-auto text-primary"
+						strokeWidth={1}
+						onClick={cleanInputAndSearch}
+					/>
+					<input
+						type="search"
+						placeholder="Search for anything..."
+						value={prop.searchInput}
+						onInput={({ target: { value } }) => {
+							setShowSuggestions(true);
+							prop.searchInputSetter(value);
+						}}
+						onKeyUp={({ key }) => {
+							setShowSuggestions(true);
+							if (key === "Enter") {
+								cleanInputAndSearch();
 
-			<input
-				type="search"
-				placeholder="Search for anything..."
-				value={prop.searchInput}
-				onInput={({ target: { value } }) => {
-					prop.searchInputSetter(value);
-				}}
-				onKeyUp={({ key }) => {
-					if (key === "Enter") cleanInputAndSearch();
-				}}
-				onChange={cleanInputAndSearch}
-				list={DATALIST_ID}
-			/>
+								setShowSuggestions(false);
+							}
+						}}
+						onPointerUp={() => setShowSuggestions(true)}
+					/>
+				</label>
+			</summary>
 
-			<datalist id={DATALIST_ID}>
-				<Suspense fallback={<Placeholder />}>
-					<For each={suggestions.latest} fallback={<Placeholder />}>
-						{(word) => <option value={word}></option>}
-					</For>
+			{/* Dropdown */}
+			<ul class="menu dropdown-content z-1 w-full rounded-box border border-primary bg-base-100 p-2 shadow-sm">
+				<Suspense fallback={<Fallback>Loading...</Fallback>}>
+					<Show
+						when={prop.searchInput}
+						fallback={<Fallback>No input...</Fallback>}
+					>
+						<Index
+							each={suggestions.latest}
+							fallback={<Fallback>No suggestions available</Fallback>}
+						>
+							{(word) => (
+								<li>
+									<button
+										type="button"
+										onClick={() => {
+											prop.searchInputSetter(word());
+											cleanInputAndSearch();
+											setShowSuggestions(false);
+										}}
+									>
+										{word()}
+									</button>
+								</li>
+							)}
+						</Index>
+					</Show>
 				</Suspense>
-			</datalist>
-		</label>
+			</ul>
+		</details>
 	);
 }
 
