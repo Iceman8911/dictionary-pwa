@@ -1,17 +1,36 @@
-export default function Placeholder() {
-	const flavourText = [
-		"Nothing :(",
-		"The void consumes all.",
-		"Guess the search query didn't work :/",
-		"Datamuse is peak, fr.",
-		"Try searching for something!",
-		"Did you type in an actual word?",
-		"Hope this dictionary proves useful for you :3",
-		"^w^",
-		"All your search results are cached so they'll even work offline!",
-		"TODO:",
-		"Could probably cache more...",
-	] as const;
+const flavourText = [
+	"Nothing :(",
+	"The void consumes all.",
+	"Guess the search query didn't work :/",
+	"Datamuse is peak, fr.",
+	"Try searching for something!",
+	"Did you type in an actual word?",
+	"Hope this dictionary proves useful for you :3",
+	"^w^",
+	"All your search results are cached so they'll even work offline!",
+	"TODO:",
+	"Could probably cache more...",
+	"Maybe try a different word?",
+	"The silence is deafening...",
+	"Error 404: Results not found",
+	"Words are hard sometimes",
+	"Even dictionaries need a break",
+	"*cricket sounds*",
+	"Have you tried turning it off and on again?",
+	"No matches found in the word dimension",
+	"The search spirits are sleeping",
+	"This space intentionally left blank",
+	"Loading... just kidding, there's nothing here",
+	"Your word might be in another castle",
+	"404: Vocabulary not found",
+	"The dictionary gremlins ate your results",
+	"Time to expand that vocabulary!",
+	"Words are like buses - none come, then loads at once",
+	"Connection to the word universe: lost",
+	"Results went on vacation",
+	"The search algorithm is having an existential crisis",
+] as const;
 
+export default function Placeholder() {
 	return flavourText[Math.floor((Math.random() * 100) % flavourText.length)];
 }
