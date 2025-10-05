@@ -71,7 +71,7 @@ export default function App() {
 						<main class="h-screen w-screen overflow-auto">
 							<Header />
 
-							<ReloadPrompt />
+							{/*<ReloadPrompt />*/}
 
 							<Suspense>{props.children}</Suspense>
 						</main>
