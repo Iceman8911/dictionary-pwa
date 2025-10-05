@@ -9,7 +9,7 @@ import {
 	createSignal,
 	For,
 	Index,
-	type JSX,
+	type JSXElement,
 	onCleanup,
 	type Setter,
 	Show,
@@ -27,26 +27,30 @@ import { gSettings } from "~/shared/store";
 import type { DictionaryWordResult } from "~/types/dictionary";
 import { capitalizeString } from "~/utils/humanify";
 
-type DictionaryWordResultCollection = Map<DICTIONARY_API, DictionaryWordResult>;
+type DictionaryResultCollection = Map<DICTIONARY_API, DictionaryWordResult>;
 
 type SearchParams = {
 	query?: string;
 };
 
+const SEARCH_MIN_LENGTH = 2;
+const SUGGESTION_PLACEHOLDER_TEXT = {
+	LOADING: "Loading...",
+	NO_INPUT: "No input...",
+	NO_SUGGESTIONS: "No suggestions available",
+} as const;
+
 export default function Home() {
 	const [searchInput, setSearchInput] = createSignal("");
-
 	const [isFetchingData, setIsFetchingData] = createSignal(false);
-
 	const [searchParams, setSearchParams] = useSearchParams<SearchParams>();
 
 	const searchWord = (word: string) => {
 		setSearchParams({ query: word });
-
 		setIsFetchingData(true);
 	};
 
-	const searchResults: AccessorWithLatest<DictionaryWordResultCollection> =
+	const searchResults: AccessorWithLatest<DictionaryResultCollection> =
 		createAsync(
 			async () => {
 				if (!searchParams.query) {
@@ -54,93 +58,115 @@ export default function Home() {
 					return new Map();
 				}
 
-				const res = (
-					await Promise.allSettled(
-						[...gSettings.dictionaries].map((dictionary) =>
-							fetchDictionaryResult({
-								word: searchParams.query ?? "",
-								dictionary,
-							}),
-						),
-					)
-				).reduce<DictionaryWordResultCollection>((acc, val) => {
-					if (val.status === "fulfilled" && val.value) {
-						acc.set(val.value.originApi, val.value);
-					}
+				const results = await Promise.allSettled(
+					[...gSettings.dictionaries].map((dictionary) =>
+						fetchDictionaryResult({
+							word: searchParams.query ?? "",
+							dictionary,
+						}),
+					),
+				);
 
-					return acc;
-				}, new Map());
+				const resultMap = results.reduce<DictionaryResultCollection>(
+					(acc, result) => {
+						if (result.status === "fulfilled" && result.value) {
+							acc.set(result.value.originApi, result.value);
+						}
+						return acc;
+					},
+					new Map(),
+				);
 
 				setIsFetchingData(false);
-
-				return res;
+				return resultMap;
 			},
 			{ initialValue: new Map() },
 		);
 
+	const gridClasses = createMemo(() => {
+		const baseClasses =
+			"grid h-[85%] grid-cols-2 grid-rows-[3rem_3rem_1fr] gap-4 px-4 pb-4 md:grid-rows-[3rem_1fr]";
+		const flipClasses =
+			gSettings.searchBarPos === "bottom" ? "-scale-y-100 *:-scale-y-100" : "";
+		return `${baseClasses} ${flipClasses}`;
+	});
+
 	return (
-		<div
-			class={`grid h-[85%] grid-cols-2 grid-rows-[3rem_3rem_1fr] gap-4 px-4 pb-4 md:grid-rows-[3rem_1fr] ${gSettings.searchBarPos === "bottom" ? "-scale-y-100 *:-scale-y-100" : ""}`}
-		>
+		<div class={gridClasses()}>
 			<SearchBar
 				searchFunction={searchWord}
 				searchInput={searchInput()}
-				searchInputSetter={setSearchInput}
+				setSearchInput={setSearchInput}
 			/>
 
 			<SearchResults
-				searchResult={searchResults()}
+				searchResults={searchResults()}
 				searchFunction={searchWord}
-				searchInputSetter={setSearchInput}
+				setSearchInput={setSearchInput}
 				isFetchingData={isFetchingData()}
 			/>
 
 			<SearchedWordInfo
-				searchResult={searchResults()}
+				searchResults={searchResults()}
 				searchFunction={searchWord}
-				searchInputSetter={setSearchInput}
+				setSearchInput={setSearchInput}
 				isFetchingData={isFetchingData()}
 			/>
 		</div>
 	);
 }
 
-function SearchBar(prop: {
+type SearchBarProps = {
 	searchFunction: (word: string) => void;
 	searchInput: string;
-	searchInputSetter: Setter<string>;
-}) {
+	setSearchInput: Setter<string>;
+};
+
+function SearchBar(props: SearchBarProps) {
+	const [showSuggestions, setShowSuggestions] = createSignal(false);
+	const [searchParams] = useSearchParams<SearchParams>();
+
 	const suggestions = createAsync(
 		async () => {
-			if (prop.searchInput.length > 2)
-				return getSearchSuggestions(prop.searchInput);
-
+			if (props.searchInput.length > SEARCH_MIN_LENGTH) {
+				return getSearchSuggestions(props.searchInput);
+			}
 			return [];
 		},
 		{ initialValue: [] },
 	);
 
-	const cleanInputAndSearch = async () => {
-		prop.searchInputSetter((oldVal) => oldVal.trim());
-
-		prop.searchFunction(prop.searchInput);
+	const executeSearch = async () => {
+		const trimmedInput = props.searchInput.trim();
+		props.setSearchInput(trimmedInput);
+		props.searchFunction(trimmedInput);
 	};
 
-	const Fallback = (prop: { children: string }) => {
-		return (
-			<li class="italic">
-				<div>{prop.children}</div>
-			</li>
-		);
+	const handleSuggestionClick = async (word: string) => {
+		setShowSuggestions(false);
+		props.setSearchInput(word);
+		props.searchFunction(word);
 	};
 
-	const [showSuggestions, setShowSuggestions] = createSignal(false);
+	const handleKeyUp = async (key: string) => {
+		setShowSuggestions(true);
+		if (key === "Enter") {
+			setShowSuggestions(false);
+			await executeSearch();
+		}
+	};
 
-	const [searchParams] = useSearchParams<SearchParams>();
+	const dropdownClasses = createMemo(() => {
+		const baseClasses =
+			"dropdown z-1 col-span-2 w-4/5 self-center justify-self-center md:w-3/5";
+		const positionClass =
+			gSettings.searchBarPos === "bottom" ? "dropdown-top" : "";
+		return `${baseClasses} ${positionClass}`;
+	});
 
 	return (
 		<details
-			class={`dropdown z-1 col-span-2 w-4/5 self-center justify-self-center md:w-3/5 ${gSettings.searchBarPos === "bottom" ? "dropdown-top" : ""}`}
+			class={dropdownClasses()}
 			open={showSuggestions()}
 			ref={(ref) => {
 				const handleClickOutside = (event: MouseEvent) => {
@@ -150,7 +176,6 @@ function SearchBar(prop: {
 				};
 
 				document.addEventListener("click", handleClickOutside);
-
 				onCleanup(() => {
 					document.removeEventListener("click", handleClickOutside);
 				});
@@ -161,100 +186,113 @@ function SearchBar(prop: {
 					<SearchIcon
 						class="btn btn-primary btn-circle btn-soft h-7/10 w-auto p-0.5"
 						strokeWidth={1.5}
-						onClick={cleanInputAndSearch}
+						onClick={executeSearch}
 					/>
 
 					<input
 						type="search"
 						placeholder="Search for anything..."
-						value={searchParams.query ?? prop.searchInput}
+						value={searchParams.query ?? props.searchInput}
 						onInput={({ target: { value } }) => {
 							setShowSuggestions(true);
-							prop.searchInputSetter(value);
+							props.setSearchInput(value);
 						}}
-						onKeyUp={async ({ key }) => {
-							setShowSuggestions(true);
-							if (key === "Enter") {
-								setShowSuggestions(false);
-
-								await cleanInputAndSearch();
-							}
-						}}
+						onKeyUp={({ key }) => handleKeyUp(key)}
 						onPointerUp={() => setShowSuggestions(true)}
 					/>
 				</label>
 			</summary>
 
-			{/* Dropdown */}
-			<ul class="menu dropdown-content z-1 mt-1 w-full rounded-box border border-primary bg-base-100 p-2 shadow-sm">
-				<Suspense fallback={<Fallback>Loading...</Fallback>}>
-					<Show
-						when={prop.searchInput}
-						fallback={<Fallback>No input...</Fallback>}
-					>
-						<Index
-							each={suggestions.latest}
-							fallback={<Fallback>No suggestions available</Fallback>}
-						>
-							{(word) => (
-								<li>
-									<button
-										type="button"
-										onClick={async () => {
-											setShowSuggestions(false);
-											prop.searchInputSetter(word());
-											await cleanInputAndSearch();
-										}}
-									>
-										{word()}
-									</button>
-								</li>
-							)}
-						</Index>
-					</Show>
-				</Suspense>
-			</ul>
+			<SuggestionsDropdown
+				searchInput={props.searchInput}
+				suggestions={[...suggestions.latest]}
+				onSuggestionClick={handleSuggestionClick}
+			/>
 		</details>
 	);
 }
 
-/** A list including the currently searched word and related ones */
-function SearchResults(prop: {
-	searchResult: DictionaryWordResultCollection;
-	searchFunction: (word: string) => void;
-	searchInputSetter: Setter<string>;
-	isFetchingData: boolean;
-}) {
-	const searchResultList = createMemo(() =>
-		prop.searchResult.size
-			? [
-					...new Set(
-						[...prop.searchResult.values()]
-							.map((res) => (res ? [res.name, res.related.synonyms] : []))
-							.flat(2),
-					),
-				]
-			: [],
+type SuggestionsDropdownProps = {
+	searchInput: string;
+	suggestions: string[];
+	onSuggestionClick: (word: string) => void;
+};
+
+function SuggestionsDropdown(props: SuggestionsDropdownProps) {
+	const FallbackMessage = (message: string) => (
+		<li class="italic">
+			<div>{message}</div>
+		</li>
 	);
 
 	return (
-		<SharedContainer class="col-span-2 md:col-span-1 md:p-4">
-			<Show when={prop.isFetchingData}>
+		<ul class="menu dropdown-content z-1 mt-1 w-full rounded-box border border-primary bg-base-100 p-2 shadow-sm">
+			<Suspense fallback={FallbackMessage(SUGGESTION_PLACEHOLDER_TEXT.LOADING)}>
+				<Show
+					when={props.searchInput}
+					fallback={FallbackMessage(SUGGESTION_PLACEHOLDER_TEXT.NO_INPUT)}
+				>
+					<Index
+						each={props.suggestions}
+						fallback={FallbackMessage(
+							SUGGESTION_PLACEHOLDER_TEXT.NO_SUGGESTIONS,
+						)}
+					>
+						{(word) => (
+							<li>
+								<button
+									type="button"
+									onClick={() => props.onSuggestionClick(word())}
+								>
+									{word()}
+								</button>
+							</li>
+						)}
+					</Index>
+				</Show>
+			</Suspense>
+		</ul>
+	);
+}
+
+type SearchResultsProps = {
+	searchResults: DictionaryResultCollection;
+	searchFunction: (word: string) => void;
+	setSearchInput: Setter<string>;
+	isFetchingData: boolean;
+};
+
+function SearchResults(props: SearchResultsProps) {
+	const wordList = createMemo(() => {
+		if (!props.searchResults.size) return [];
+
+		const allWords = [...props.searchResults.values()]
+			.filter(Boolean)
+			.flatMap((result) => [result.name, ...result.related.synonyms]);
+
+		return [...new Set(allWords)];
+	});
+
+	const handleWordClick = (word: string) => {
+		props.searchFunction(word);
+		props.setSearchInput(word);
+	};
+
+	return (
+		<Container class="col-span-2 md:col-span-1 md:p-4">
+			<Show when={props.isFetchingData}>
 				<LoadingSpinner />
 			</Show>
 
 			<ul class="menu menu-horizontal md:menu-vertical size-full flex-nowrap overflow-x-auto md:text-lg">
 				<Suspense>
-					<For each={searchResultList()} fallback={<Placeholder />}>
+					<For each={wordList()} fallback={<Placeholder />}>
 						{(word, index) => (
 							<li>
 								<button
 									type="button"
 									class={`link ${index() === 0 ? "link-primary" : ""}`}
-									onClick={(_) => {
-										prop.searchFunction(word);
-										prop.searchInputSetter(word);
-									}}
+									onClick={() => handleWordClick(word)}
 								>
 									{capitalizeString(word)}
 								</button>
@@ -263,288 +301,307 @@ function SearchResults(prop: {
 					</For>
 				</Suspense>
 			</ul>
-		</SharedContainer>
+		</Container>
 	);
 }
 
-/** Relevant data about the currently searched word */
-function SearchedWordInfo(prop: {
-	searchResult: DictionaryWordResultCollection;
+type SearchedWordInfoProps = {
+	searchResults: DictionaryResultCollection;
 	searchFunction: (word: string) => void;
-	searchInputSetter: Setter<string>;
+	setSearchInput: Setter<string>;
 	isFetchingData: boolean;
-}) {
-	const searchFunc = (word: string) => {
-		prop.searchFunction(word);
-		prop.searchInputSetter(word);
+};
+
+function SearchedWordInfo(props: SearchedWordInfoProps) {
+	const [selectedApiSource, setSelectedApiSource] =
+		createSignal<DICTIONARY_API | null>(null);
+
+	const defaultApiSource = () => [...props.searchResults.keys()][0] ?? null;
+
+	const currentApiSource = createMemo(
+		() => selectedApiSource() ?? defaultApiSource(),
+	);
+
+	const currentResult = createMemo(() => {
+		const source = currentApiSource();
+		if (!source) return null;
+
+		return (
+			props.searchResults.get(source) ??
+			props.searchResults.get(defaultApiSource() ?? DICTIONARY_API.DATAMUSE)
+		);
+	});
+
+	const handleWordClick = (word: string) => {
+		props.searchFunction(word);
+		props.setSearchInput(word);
 	};
 
-	function Definitions(prop: {
-		definitions: DictionaryWordResult["definitions"];
-	}) {
-		return (
-			<div>
-				<Show when={!!prop.definitions.length && prop.definitions}>
-					{(definitions) => (
-						<>
-							<span>Definitions:</span>
-
-							<ul class="mt-1 flex flex-col gap-1">
-								<For each={definitions()}>
-									{({ definition, partOfSpeech }, index) => (
-										<li>
-											<span>{index() + 1}.</span>{" "}
-											<Show when={partOfSpeech}>
-												<span> {`(${partOfSpeech}) `}</span>
-											</Show>
-											{definition}
-										</li>
-									)}
-								</For>
-							</ul>
-						</>
-					)}
-				</Show>
-			</div>
-		);
-	}
-
-	function Examples(prop: {
-		examples: DictionaryWordResult["examples"];
-		word: string;
-	}) {
-		return (
-			<div>
-				<Show when={!!prop.examples.length && prop.examples}>
-					{(examples) => (
-						<>
-							<span>Examples:</span>
-
-							<ul class="mt-1 flex flex-col gap-1">
-								<For each={examples()}>
-									{({ example, partOfSpeech }, index) => {
-										// Highlight the specific word in the example, but extracting it from the string and adding the word manually
-										const splitExample = example.split(prop.word);
-
-										return (
-											<li>
-												<span>{index() + 1}.</span>{" "}
-												<Show when={partOfSpeech}>
-													<span> {`(${partOfSpeech}) `}</span>
-												</Show>
-												<For each={splitExample}>
-													{(fragment, index) => (
-														<>
-															{fragment}
-
-															<Show when={index() + 1 < splitExample.length}>
-																<span class="text-info">{prop.word}</span>
-															</Show>
-														</>
-													)}
-												</For>
-											</li>
-										);
-									}}
-								</For>
-							</ul>
-						</>
-					)}
-				</Show>
-			</div>
-		);
-	}
-
-	function Frequency(prop: { freq: DictionaryWordResult["frequency"] }) {
-		return (
-			<Show when={prop.freq}>
-				{(freq) => (
-					<div>
-						<span>Frequency In Daily Use:</span> {freq()}
-					</div>
-				)}
+	return (
+		<Container class="col-span-2 md:col-span-1">
+			<Show when={props.isFetchingData}>
+				<LoadingSpinner />
 			</Show>
-		);
-	}
 
-	function Audio(prop: { urls: DictionaryWordResult["audioUrls"] }) {
-		return (
-			<Show when={prop.urls.length}>
-				<div class="flex flex-wrap gap-2">
-					<span>Audio:</span>{" "}
-					<For each={prop.urls}>
-						{(url) => (
+			<Suspense>
+				<Show when={currentResult()} fallback={<Placeholder />}>
+					{(result) => (
+						<div class="flex size-full flex-col gap-3 overflow-y-auto p-4 [&_span]:font-semibold">
+							<SourceInfo
+								currentApi={result().originApi}
+								allResults={props.searchResults}
+								currentApiSource={currentApiSource()}
+								onSourceChange={setSelectedApiSource}
+							/>
+
+							<WordBasicInfo result={result()} />
+
+							<AudioSection urls={result().audioUrls} />
+
+							<DefinitionsSection definitions={result().definitions} />
+
+							<ExamplesSection
+								examples={result().examples}
+								word={result().name}
+							/>
+
+							<FrequencySection frequency={result().frequency} />
+
+							<RelatedWordsSection
+								synonyms={result().related.synonyms}
+								antonyms={result().related.antonyms}
+								onWordClick={handleWordClick}
+							/>
+						</div>
+					)}
+				</Show>
+			</Suspense>
+		</Container>
+	);
+}
+
+type SourceInfoProps = {
+	currentApi: DICTIONARY_API;
+	allResults: DictionaryResultCollection;
+	currentApiSource: DICTIONARY_API | null;
+	onSourceChange: (api: DICTIONARY_API) => void;
+};
+
+function SourceInfo(props: SourceInfoProps) {
+	const otherSources = createMemo(() =>
+		[...props.allResults.entries()].filter(
+			([api, result]) => api !== props.currentApiSource && result,
+		),
+	);
+
+	return (
+		<>
+			<div>
+				<span>Sourced From:</span>{" "}
+				<span class="text-primary">
+					{getNameOfDictionaryApi(props.currentApi)}
+				</span>
+			</div>
+
+			<Show when={otherSources().length > 0}>
+				<div>
+					<span>Other Sources:</span>{" "}
+					<For each={otherSources()}>
+						{([api], index) => (
 							<>
-								<audio class="inline-block" controls preload="none" src={url}>
-									<track kind="captions"></track>
-								</audio>{" "}
+								<button
+									type="button"
+									class="link link-primary"
+									onClick={() => props.onSourceChange(api)}
+								>
+									{getNameOfDictionaryApi(api)}
+								</button>
+								<Show when={index() + 1 < otherSources().length} fallback={"."}>
+									{", "}
+								</Show>
 							</>
 						)}
 					</For>
 				</div>
 			</Show>
-		);
-	}
-
-	function RelatedWordList(prop: { list: string[]; name: string }) {
-		return (
-			<Show when={prop.list.length}>
-				{(length) => (
-					<div>
-						<span>{prop.name}: </span>
-
-						<For each={prop.list}>
-							{(synonym, index) => (
-								<>
-									<button
-										type="button"
-										class="link link-primary"
-										onClick={(_) => searchFunc(synonym)}
-									>
-										{synonym}
-									</button>
-
-									<Show when={index() + 1 < length()} fallback={"."}>
-										{", "}
-									</Show>
-								</>
-							)}
-						</For>
-					</div>
-				)}
-			</Show>
-		);
-	}
-
-	/** The default dictionary result source freshly fetched from the api */
-	const apiResultSourceFromSearchResults = () =>
-		[...prop.searchResult.keys()][0] ?? null;
-
-	/** The dictionary result source that the user explicitly chooses by clicking on */
-	const [apiResultSourceFromUserChoice, setApiResultFromUserChoice] =
-		createSignal<DICTIONARY_API | null>(null);
-
-	/** The dictionary result source to actually use, with priority given to the user's choice */
-	const apiResultSourceToView = createMemo(
-		() => apiResultSourceFromUserChoice() ?? apiResultSourceFromSearchResults(),
+		</>
 	);
+}
 
-	/** Actual data to use for displaying with a backup incase of edge cases */
-	const apiResultToView = createMemo(
-		() =>
-			prop.searchResult.get(
-				apiResultSourceToView() ?? DICTIONARY_API.DATAMUSE,
-			) ??
-			prop.searchResult.get(
-				apiResultSourceFromSearchResults() ?? DICTIONARY_API.DATAMUSE,
-			),
-	);
-
+function WordBasicInfo(props: { result: DictionaryWordResult }) {
 	return (
-		<SharedContainer class="col-span-2 md:col-span-1">
-			<Show when={prop.isFetchingData}>
-				<LoadingSpinner />
+		<>
+			<div>
+				<span>Name:</span>{" "}
+				<span class="text-primary">{capitalizeString(props.result.name)}</span>
+			</div>
+
+			<Show when={props.result.partsOfSpeech.length > 0}>
+				<div>
+					<span>Part Of Speech:</span> {props.result.partsOfSpeech.join(", ")}
+				</div>
 			</Show>
 
-			<Suspense>
-				<Show when={apiResultToView()} fallback={<Placeholder />}>
-					{(val) => (
-						<div class="flex size-full flex-col gap-3 overflow-y-auto p-4 [&_span]:font-semibold">
-							<div>
-								<span>Sourced From:</span>{" "}
-								<span class="text-primary">
-									{getNameOfDictionaryApi(val().originApi)}
-								</span>
-							</div>
+			<Show when={props.result.phonetics.length > 0}>
+				<div>
+					<span>IPA Phonetics:</span>{" "}
+					<For each={props.result.phonetics}>
+						{(phonetic, index) => (
+							<>
+								{phonetic}
+								<Show
+									when={index() + 1 < props.result.phonetics.length}
+									fallback={"."}
+								>
+									{", "}
+								</Show>
+							</>
+						)}
+					</For>
+				</div>
+			</Show>
+		</>
+	);
+}
 
-							<Show when={prop.searchResult.size > 1}>
-								<div>
-									<span>Other Sources:</span>{" "}
-									<For each={[...prop.searchResult]}>
-										{(res, index) => (
-											<Show when={res[0] !== apiResultSourceToView() && res[1]}>
-												{(res) => (
-													<>
-														<button
-															type="button"
-															class="link link-primary"
-															onClick={(_) =>
-																setApiResultFromUserChoice(res().originApi)
-															}
-														>
-															{getNameOfDictionaryApi(res().originApi)}
-														</button>
+function AudioSection(props: { urls: string[] }) {
+	return (
+		<Show when={props.urls.length > 0}>
+			<div class="flex flex-wrap gap-2">
+				<span>Audio:</span>
+				<For each={props.urls}>
+					{(url) => (
+						<audio class="inline-block" controls preload="none" src={url}>
+							<track kind="captions" />
+						</audio>
+					)}
+				</For>
+			</div>
+		</Show>
+	);
+}
 
-														<Show
-															when={index() + 1 < prop.searchResult.size}
-															fallback={"."}
-														>
-															{", "}
-														</Show>
-													</>
-												)}
-											</Show>
-										)}
-									</For>
-								</div>
-							</Show>
+function DefinitionsSection(props: {
+	definitions: DictionaryWordResult["definitions"];
+}) {
+	return (
+		<Show when={props.definitions.length > 0}>
+			<div>
+				<span>Definitions:</span>
+				<ul class="mt-1 flex flex-col gap-1">
+					<For each={props.definitions}>
+						{({ definition, partOfSpeech }, index) => (
+							<li>
+								<span>{index() + 1}.</span>
+								<Show when={partOfSpeech}>
+									<span> ({partOfSpeech}) </span>
+								</Show>
+								{definition}
+							</li>
+						)}
+					</For>
+				</ul>
+			</div>
+		</Show>
+	);
+}
 
-							<div>
-								<span>Name:</span>{" "}
-								<span class="text-primary">{capitalizeString(val().name)}</span>
-							</div>
+function ExamplesSection(props: {
+	examples: DictionaryWordResult["examples"];
+	word: string;
+}) {
+	return (
+		<Show when={props.examples.length > 0}>
+			<div>
+				<span>Examples:</span>
+				<ul class="mt-1 flex flex-col gap-1">
+					<For each={props.examples}>
+						{({ example, partOfSpeech }, index) => {
+							const parts = example.split(props.word);
 
-							<Show when={val().partsOfSpeech.length}>
-								<div>
-									<span>Part Of Speech:</span> {val().partsOfSpeech.join(", ")}
-								</div>
-							</Show>
-
-							<Show when={val().phonetics.length}>
-								<div>
-									<span>IPA Phonetics:</span>{" "}
-									<For each={val().phonetics}>
-										{(phonetic, index) => (
+							return (
+								<li>
+									<span>{index() + 1}.</span>
+									<Show when={partOfSpeech}>
+										<span> ({partOfSpeech}) </span>
+									</Show>
+									<For each={parts}>
+										{(part, i) => (
 											<>
-												{phonetic}
-
-												<Show
-													when={index() + 1 < val().phonetics.length}
-													fallback={"."}
-												>
-													{", "}
+												{part}
+												<Show when={i() < parts.length - 1}>
+													<span class="text-info">{props.word}</span>
 												</Show>
 											</>
 										)}
 									</For>
-								</div>
-							</Show>
-
-							<Audio urls={val().audioUrls} />
-
-							<Definitions definitions={val().definitions} />
-
-							<Examples examples={val().examples} word={val().name} />
-
-							<Frequency freq={val().frequency} />
-
-							<RelatedWordList list={val().related.synonyms} name="Synonyms" />
-
-							<RelatedWordList list={val().related.antonyms} name="Antonyms" />
-						</div>
-					)}
-				</Show>
-			</Suspense>
-		</SharedContainer>
+								</li>
+							);
+						}}
+					</For>
+				</ul>
+			</div>
+		</Show>
 	);
 }
 
-function SharedContainer(prop: { class?: string; children: JSX.Element }) {
+function FrequencySection(props: {
+	frequency: DictionaryWordResult["frequency"];
+}) {
+	return (
+		<Show when={props.frequency}>
+			{(freq) => (
+				<div>
+					<span>Frequency In Daily Use:</span> {freq()}
+				</div>
+			)}
+		</Show>
+	);
+}
+
+function RelatedWordsSection(props: {
+	synonyms: string[];
+	antonyms: string[];
+	onWordClick: (word: string) => void;
+}) {
+	const renderWordList = (words: string[], title: string) => (
+		<Show when={words.length > 0}>
+			<div>
+				<span>{title}:</span>{" "}
+				<For each={words}>
+					{(word, index) => (
+						<>
+							<button
+								type="button"
+								class="link link-primary"
+								onClick={() => props.onWordClick(word)}
+							>
+								{word}
+							</button>
+							<Show when={index() + 1 < words.length} fallback={"."}>
+								{", "}
+							</Show>
+						</>
+					)}
+				</For>
+			</div>
+		</Show>
+	);
+
+	return (
+		<>
+			{renderWordList(props.synonyms, "Synonyms")}
+			{renderWordList(props.antonyms, "Antonyms")}
+		</>
+	);
+}
+
+function Container(props: { class?: string; children: JSXElement }) {
 	return (
 		<div
-			class={`relative flex items-center justify-center overflow-hidden rounded-box bg-base-200 ${prop.class}`}
+			class={`relative flex items-center justify-center overflow-hidden rounded-box bg-base-200 ${props.class ?? ""}`}
 		>
-			{prop.children}
+			{props.children}
 		</div>
 	);
 }
