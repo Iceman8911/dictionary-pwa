@@ -169,7 +169,7 @@ function DictionarySelector(props: SettingsProps) {
 	};
 
 	return (
-		<SettingsFieldset legend="Dictionaries To Use" class="sm:w-68 md:min-w-fit">
+		<SettingsFieldset legend="Dictionaries To Use">
 			<div class="grid size-fit grid-cols-2 gap-2">
 				<For each={Object.values(DICTIONARY_API)}>
 					{(dictionary) => {
@@ -304,7 +304,7 @@ function RangeInput(props: {
 				min={props.min}
 				max={props.max}
 				value={props.value}
-				class="range range-sm mb-2 w-3xs md:w-xs"
+				class="range range-sm mb-2 w-full"
 				onInput={({ target: { value } }) => props.onInput(Number(value))}
 			/>
 		</div>
@@ -352,7 +352,7 @@ function SettingsFieldset(props: {
 }) {
 	return (
 		<fieldset
-			class={`fieldset size-fit rounded-box border border-base-300 bg-base-200 p-4 ${props.class ?? ""}`}
+			class={`fieldset h-fit w-82 rounded-box border border-base-300 bg-base-200 p-4 md:w-90 ${props.class ?? ""}`}
 		>
 			<legend class="fieldset-legend">{props.legend}</legend>
 			{props.children}
