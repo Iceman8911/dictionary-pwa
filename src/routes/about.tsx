@@ -35,6 +35,7 @@ export default function AboutPage() {
 					<A
 						href="https://github.com/Iceman8911/dictionary-pwa"
 						target="_blank"
+						about="Github"
 					>
 						<svg
 							role="img"
