@@ -1,5 +1,5 @@
 import { trackStore } from "@solid-primitives/deep";
-import { createEffect, For, JSXElement, Match, on, Switch } from "solid-js";
+import { createEffect, createSelector, For, Match, on, Switch } from "solid-js";
 import { createStore, produce, type StoreSetter, unwrap } from "solid-js/store";
 import Tooltip from "~/components/tooltip";
 import { getNameOfDictionaryApi } from "~/dictionaries/dictionary";
@@ -220,15 +220,73 @@ export default function Settings() {
 		);
 	}
 
+	function UiSettings() {
+		const searchBarPosTag = "search-bar-pos" as const;
+
+		const searchBarPosSelector = createSelector(
+			() => tempSettings.searchBarPos,
+		);
+
+		return (
+			<fieldset class="fieldset size-fit rounded-box border border-base-300 bg-base-200 p-4">
+				<legend class="fieldset-legend">UI</legend>
+
+				<ul>
+					<li class="space-x-2">
+						<label for={searchBarPosTag} class="font-semibold">
+							Search Bar Position:
+						</label>
+
+						<label class="label text-base-content">
+							Top{" "}
+							<input
+								type="radio"
+								name={searchBarPosTag}
+								class="radio"
+								checked={searchBarPosSelector("top")}
+								onInput={() =>
+									setTempSettings(
+										produce((s) => {
+											s.searchBarPos = "top";
+										}),
+									)
+								}
+							/>
+						</label>
+
+						<label class="label text-base-content">
+							Bottom{" "}
+							<input
+								type="radio"
+								name={searchBarPosTag}
+								class="radio"
+								checked={searchBarPosSelector("bottom")}
+								onInput={() =>
+									setTempSettings(
+										produce((s) => {
+											s.searchBarPos = "bottom";
+										}),
+									)
+								}
+							/>
+						</label>
+					</li>
+				</ul>
+			</fieldset>
+		);
+	}
+
 	return (
 		<form
-			class="relative flex h-[85%] flex-col flex-wrap gap-4 p-4 pt-0 md:pt-4"
+			class="relative flex h-[85%] flex-col flex-wrap gap-2 p-4 pt-0 md:pt-4"
 			onSubmit={(e) => {
 				e.preventDefault();
 
 				gSetSettings(tempSettings);
 			}}
 		>
+			<UiSettings />
+
 			<SelectedDictionaryApis />
 
 			<CacheSettingRanges />

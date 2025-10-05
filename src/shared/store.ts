@@ -22,6 +22,8 @@ const gDefaultSettings = {
 	dictionaries: new Set([DATAMUSE]),
 
 	savedOn: new Date(0),
+
+	searchBarPos: "top",
 } as const satisfies GlobalSettings;
 
 const [gSettings, gSetSettings] = createStore<GlobalSettings>(

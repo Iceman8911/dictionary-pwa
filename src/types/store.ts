@@ -30,6 +30,9 @@ type GlobalSettings = {
 		/** Amount of cache entries to be processed and loaded into memory when cleanup begins */
 		batchSize: number;
 	};
+
+	/** The position of the searchbar on the search page */
+	searchBarPos: "top" | "bottom";
 };
 
 export type { GlobalSettings };

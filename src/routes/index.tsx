@@ -79,7 +79,9 @@ export default function Home() {
 		);
 
 	return (
-		<div class="grid h-[85%] grid-cols-2 grid-rows-[3rem_3rem_1fr] gap-4 px-4 pb-4 md:grid-rows-[3rem_1fr]">
+		<div
+			class={`grid h-[85%] grid-cols-2 grid-rows-[3rem_3rem_1fr] gap-4 px-4 pb-4 md:grid-rows-[3rem_1fr] ${gSettings.searchBarPos === "bottom" ? "-scale-y-100 *:-scale-y-100" : ""}`}
+		>
 			<SearchBar
 				searchFunction={searchWord}
 				searchInput={searchInput()}
@@ -138,7 +140,7 @@ function SearchBar(prop: {
 
 	return (
 		<details
-			class="dropdown col-span-2 w-4/5 self-center justify-self-center md:w-3/5"
+			class={`dropdown z-1 col-span-2 w-4/5 self-center justify-self-center md:w-3/5 ${gSettings.searchBarPos === "bottom" ? "dropdown-top" : ""}`}
 			open={showSuggestions()}
 			ref={(ref) => {
 				const handleClickOutside = (event: MouseEvent) => {
