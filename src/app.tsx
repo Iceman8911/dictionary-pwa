@@ -7,7 +7,6 @@ import { Link, MetaProvider } from "@solidjs/meta";
 import { onMount } from "solid-js";
 import * as idb from "~/utils/idb";
 import Header from "./components/header";
-import ReloadPrompt from "./components/reload-prompt";
 import { cleanupExpiredCachedEntriesWhenAboveSizeLimit } from "./dictionaries/dictionary";
 import { gSetSettings, gSettings } from "./shared/store";
 
@@ -71,7 +70,7 @@ export default function App() {
 						<main class="h-screen w-screen overflow-auto">
 							<Header />
 
-							<ReloadPrompt />
+							{/*<ReloadPrompt />*/}
 
 							<Suspense>{props.children}</Suspense>
 						</main>
