@@ -1,6 +1,6 @@
 const APP_INFO = {
 	name: "Offline Dictionary PWA",
-	version: "0.0.4",
+	version: "0.1.0",
 	description:
 		"A fast, offline-capable dictionary application built with SolidJS and SolidStart.",
 	features: [
