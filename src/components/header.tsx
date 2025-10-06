@@ -11,17 +11,21 @@ export default function Header() {
 				Lexi Cache
 			</A>
 
-			<A href="/settings" end>
+			<A href="/settings" aria-label="To Settings Page" end>
 				<div class="tooltip tooltip-bottom" data-tip="Settings">
-					<button type="button" class="btn btn-circle p-1.5">
+					<button
+						type="button"
+						class="btn btn-circle p-1.5"
+						aria-label="Settings"
+					>
 						<SettingsIcon class="h-8 w-auto" />
 					</button>
 				</div>
 			</A>
 
-			<A href="/about" end>
+			<A href="/about" aria-label="To About Page" end>
 				<div class="tooltip tooltip-bottom" data-tip="About">
-					<button type="button" class="btn btn-circle p-1.5">
+					<button type="button" class="btn btn-circle p-1.5" aria-label="About">
 						<InfoIcon class="h-8 w-auto" />
 					</button>
 				</div>

@@ -3,7 +3,7 @@ import { FileRoutes } from "@solidjs/start/router";
 import { createEffect, on, Show, Suspense, untrack } from "solid-js";
 import "./app.css";
 import { pwaInfo } from "virtual:pwa-info";
-import { Link, MetaProvider } from "@solidjs/meta";
+import { Link, Meta, MetaProvider, Title } from "@solidjs/meta";
 import { onMount } from "solid-js";
 import * as idb from "~/utils/idb";
 import Header from "./components/header";
@@ -47,6 +47,13 @@ export default function App() {
 
 	return (
 		<MetaProvider>
+			<Title>Lexi Cache</Title>
+
+			<Meta
+				name="description"
+				content="A Simple Offline-First Dictionary PWA"
+			/>
+
 			{/* check for and add a Link for the web manifest */}
 			<Show when={webManifest()}>
 				{(data) => (
@@ -57,13 +64,9 @@ export default function App() {
 					/>
 				)}
 			</Show>
-
 			<Link rel="icon" href="/favicon.ico" sizes="48x48" />
-
 			<Link rel="icon" href="/logo.webp" sizes="any" type="image/webp" />
-
 			<Link rel="apple-touch-icon" href="/apple-touch-icon-180x180.webp" />
-
 			<Router
 				root={(props) => (
 					<>

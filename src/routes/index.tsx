@@ -286,7 +286,14 @@ function SearchResults(props: SearchResultsProps) {
 
 			<ul class="menu menu-horizontal md:menu-vertical size-full flex-nowrap overflow-x-auto md:text-lg">
 				<Suspense>
-					<For each={wordList()} fallback={<Placeholder />}>
+					<For
+						each={wordList()}
+						fallback={
+							<li>
+								<Placeholder />
+							</li>
+						}
+					>
 						{(word, index) => (
 							<li>
 								<button
