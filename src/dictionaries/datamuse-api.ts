@@ -13,8 +13,6 @@ const WORDS_ENDPOINT = `${DATAMUSE_BASE_URL}/words`;
 const SUGGESTION_ENDPOINT = `${DATAMUSE_BASE_URL}/sug`;
 
 const GenericPayloadSchema = v.object({
-	word: v.string(),
-
 	/** Max value of 1000
 	 *
 	 * Default of 10
@@ -26,6 +24,7 @@ const GenericPayloadSchema = v.object({
 		),
 		10,
 	),
+	word: v.string(),
 });
 
 const SuggestionPayloadSchema = GenericPayloadSchema;
@@ -36,14 +35,13 @@ const SuggestionResponseSchema = v.pipe(
 	v.array(
 		v.pipe(
 			v.object({
-				/** A suggested word */
-				word: v.string(),
-
 				/** Ranking of this word compared to others in the array.
 				 *
 				 * Higher is better
 				 */
 				score: v.number(),
+				/** A suggested word */
+				word: v.string(),
 			}),
 			v.readonly(),
 		),
@@ -117,11 +115,8 @@ const WordSearchResponseSchema = v.pipe(
 	v.array(
 		v.pipe(
 			v.object({
-				/** A word that matches the search query */
-				word: v.string(),
-
-				/** Ranking of the word in relation to the others in the array */
-				score: v.optional(v.number()),
+				/** If the word is an inflected form (such as the plural of a noun or a conjugated form of a verb), then an additional `defHeadword` field will be added indicating the base form from which the definitions are drawn */
+				defHeadword: v.optional(v.string(), ""),
 
 				/** Definitions for th word */
 				defs: v.optional(
@@ -135,8 +130,8 @@ const WordSearchResponseSchema = v.pipe(
 					[],
 				),
 
-				/** If the word is an inflected form (such as the plural of a noun or a conjugated form of a verb), then an additional `defHeadword` field will be added indicating the base form from which the definitions are drawn */
-				defHeadword: v.optional(v.string(), ""),
+				/** Ranking of the word in relation to the others in the array */
+				score: v.optional(v.number()),
 
 				/** Extra metadata about the word such as it's part of speech, IPA phonetics, etc */
 				tags: v.array(
@@ -148,6 +143,8 @@ const WordSearchResponseSchema = v.pipe(
 						),
 					]),
 				),
+				/** A word that matches the search query */
+				word: v.string(),
 			}),
 			v.readonly(),
 		),
@@ -371,10 +368,10 @@ async function queryWordForDictionaryResult(
 		// REVIEW: Maybe normalize the scores of the related words to be between 0 and 1. While the exact word will be 1
 
 		return convertWordSearchResponseOutputToDictionarySchema({
-			main: parsedExactWord,
-			synonyms: parsedSynonymWords,
 			antonyms: parsedAntonymWords,
+			main: parsedExactWord,
 			searchTerm: word,
+			synonyms: parsedSynonymWords,
 		});
 	} catch (e) {
 		console.warn(

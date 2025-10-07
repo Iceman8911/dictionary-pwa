@@ -8,11 +8,11 @@ const ReloadPrompt: Component = () => {
 		needRefresh: [needRefresh, setNeedRefresh],
 		updateServiceWorker,
 	} = useRegisterSW({
-		onRegistered(r) {
-			console.log("SW Registered: ", r);
-		},
 		onRegisterError(error) {
 			console.log("SW registration error", error);
+		},
+		onRegistered(r) {
+			console.log("SW Registered: ", r);
 		},
 	});
 

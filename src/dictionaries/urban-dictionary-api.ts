@@ -7,33 +7,29 @@ const { URBAN_DICTIONARY } = DICTIONARY_API;
 
 const ResponseSchema = v.union([
 	v.object({
-		/** Should be in the 200 range if successful */
-		statusCode: HttpStatusCode,
+		/** The real useful stuff */
+		data: v.array(
+			v.object({
+				/** Account that uploaded this meaning */
+				contributor: v.string(),
 
-		/** The searched word or phrase */
-		term: v.string(),
+				/** e.g "February 04, 2004" */
+				date: v.string(),
+
+				example: v.string(),
+
+				meaning: v.string(),
+				word: v.string(),
+			}),
+		),
 
 		/** Whether `data` will be populated */
 		found: BooleanString,
 
 		params: v.object({
-			/** Whether to return only exact matches **Eg. return only "bigger" and not "biggering", "biggered"** */
-			strict: BooleanString,
-
 			limit: NumberString,
 
 			matchCase: BooleanString,
-
-			scrapeType: v.union([
-				v.literal("search"),
-				v.literal("random"),
-				v.literal("browse"),
-				v.literal("author"),
-				v.literal("date"),
-			]),
-
-			/** Eg. page = 5, get all definitions from the 5th page only */
-			page: NumberString,
 
 			/** 'false' or stuff like '2,4' where '2,4' will return all definitions from page 2 to page 4*/
 			multiPage: v.pipe(
@@ -61,37 +57,37 @@ const ResponseSchema = v.union([
 					return false;
 				}),
 			),
+
+			/** Eg. page = 5, get all definitions from the 5th page only */
+			page: NumberString,
+
+			scrapeType: v.union([
+				v.literal("search"),
+				v.literal("random"),
+				v.literal("browse"),
+				v.literal("author"),
+				v.literal("date"),
+			]),
+			/** Whether to return only exact matches **Eg. return only "bigger" and not "biggering", "biggered"** */
+			strict: BooleanString,
 		}),
+		/** Should be in the 200 range if successful */
+		statusCode: HttpStatusCode,
+
+		/** The searched word or phrase */
+		term: v.string(),
 
 		/** Number of pages the results were extracted from */
 		totalPages: v.number(),
-
-		/** The real useful stuff */
-		data: v.array(
-			v.object({
-				word: v.string(),
-
-				meaning: v.string(),
-
-				example: v.string(),
-
-				/** Account that uploaded this meaning */
-				contributor: v.string(),
-
-				/** e.g "February 04, 2004" */
-				date: v.string(),
-			}),
-		),
 	}),
 	v.object({
+		data: v.tuple([]),
+
+		message: v.literal("No definitions found for this word"),
 		/** Will be 404 or smth */
 		statusCode: HttpStatusCode,
 
 		term: v.string(),
-
-		data: v.tuple([]),
-
-		message: v.literal("No definitions found for this word"),
 	}),
 ]);
 

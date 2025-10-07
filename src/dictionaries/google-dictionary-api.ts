@@ -18,8 +18,29 @@ const ResponseSchema = v.union([
 		v.tuple([
 			v.pipe(
 				v.object({
-					/** The name of the word */
-					word: v.string(),
+					license: LicenseSchema,
+
+					meanings: v.array(
+						v.object({
+							antonyms: StringArraySchema,
+
+							/** Each array element will have a seperate definition and maybe synonyms / antonyms that relate to that particular definition */
+							definitions: v.array(
+								v.object({
+									antonyms: StringArraySchema,
+									definition: v.string(),
+
+									/** An example sentence that uses the `word` in particular */
+									example: v.optional(v.string()),
+
+									synonyms: StringArraySchema,
+								}),
+							),
+							partOfSpeech: PartOfSpeech,
+
+							synonyms: StringArraySchema,
+						}),
+					),
 
 					/** Generic IPA pronounciation */
 					phonetic: v.optional(IpaPhonetic),
@@ -29,44 +50,20 @@ const ResponseSchema = v.union([
 							/** Url to an mp3 pronounciation */
 							audio: v.union([UrlString, v.literal("")]),
 
-							/** Url to it's wikimedia source */
-							sourceUrl: v.optional(UrlString),
-
 							/** License data */
 							license: v.optional(LicenseSchema),
+
+							/** Url to it's wikimedia source */
+							sourceUrl: v.optional(UrlString),
 
 							/** IPA pronounciation */
 							text: v.optional(IpaPhonetic),
 						}),
 					),
 
-					meanings: v.array(
-						v.object({
-							partOfSpeech: PartOfSpeech,
-
-							/** Each array element will have a seperate definition and maybe synonyms / antonyms that relate to that particular definition */
-							definitions: v.array(
-								v.object({
-									definition: v.string(),
-
-									synonyms: StringArraySchema,
-
-									antonyms: StringArraySchema,
-
-									/** An example sentence that uses the `word` in particular */
-									example: v.optional(v.string()),
-								}),
-							),
-
-							synonyms: StringArraySchema,
-
-							antonyms: StringArraySchema,
-						}),
-					),
-
-					license: LicenseSchema,
-
 					sourceUrls: v.array(UrlString),
+					/** The name of the word */
+					word: v.string(),
 				}),
 				v.readonly(),
 			),
@@ -75,11 +72,10 @@ const ResponseSchema = v.union([
 	),
 	// This will only be a regular object if no definitions were found
 	v.object({
-		title: v.literal("No Definitions Found"),
-
 		message: v.string(),
 
 		resolution: v.string(),
+		title: v.literal("No Definitions Found"),
 	}),
 ]);
 

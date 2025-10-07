@@ -17,22 +17,22 @@ import * as idb from "~/utils/idb";
 import { cloneStore } from "~/utils/store";
 
 const CACHE_LIMITS = {
-	DURATION: { min: 1000, max: 1000 * 60 * 60 * 24 * 7 }, // 1 second to 7 days
-	SIZE: { min: 10, max: 5000 }, // 10 to 5000 entries
-	CLEANUP_INTERVAL: { min: 1000 * 10, max: 1000 * 60 * 60 }, // 10 seconds to 1 hour
-	CLEANUP_BATCH: { min: 1, max: 1000 }, // 1 to 1000 entries
+	CLEANUP_BATCH: { max: 1000, min: 1 }, // 1 to 1000 entries
+	CLEANUP_INTERVAL: { max: 1000 * 60 * 60, min: 1000 * 10 }, // 10 seconds to 1 hour
+	DURATION: { max: 1000 * 60 * 60 * 24 * 7, min: 1000 }, // 1 second to 7 days
+	SIZE: { max: 5000, min: 10 }, // 10 to 5000 entries
 } as const;
 
 const TOOLTIP_MESSAGES = {
-	URBAN_DICT_WARNING:
-		"Enabling this may slow down the search. Also provides suggestions",
-	DATAMUSE_INFO: "Also provides suggestions",
 	CACHE_DURATION: "How long till a cached word is refreshed",
 	CACHE_SIZE:
 		"To prevent the cache from bloating up too much, since each entry is ~2.6KB",
-	CLEANUP_INTERVAL: "How often should the app try to evict expired caches",
 	CLEANUP_BATCH:
 		"When evicting expired caches, how many entries should be processed at once",
+	CLEANUP_INTERVAL: "How often should the app try to evict expired caches",
+	DATAMUSE_INFO: "Also provides suggestions",
+	URBAN_DICT_WARNING:
+		"Enabling this may slow down the search. Also provides suggestions",
 } as const;
 
 export default function Settings() {

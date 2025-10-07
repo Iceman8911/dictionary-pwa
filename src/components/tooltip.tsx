@@ -11,10 +11,10 @@ export default function Tooltip(prop: {
 	dir?: "up" | "down" | "right" | "left";
 }) {
 	const directions = {
-		up: "tooltip-up",
 		down: "tooltip-down",
-		right: "tooltip-right",
 		left: "tooltip-left",
+		right: "tooltip-right",
+		up: "tooltip-up",
 	} as const;
 
 	return (

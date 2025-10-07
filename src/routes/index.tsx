@@ -61,8 +61,8 @@ export default function Home() {
 				const results = await Promise.allSettled(
 					[...gSettings.dictionaries].map((dictionary) =>
 						fetchDictionaryResult({
-							word: searchParams.query ?? "",
 							dictionary,
+							word: searchParams.query ?? "",
 						}),
 					),
 				);

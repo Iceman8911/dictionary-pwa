@@ -11,11 +11,11 @@ const DICTIONARY_API = {
 	/** https://www.datamuse.com/api */
 	DATAMUSE: "https://api.datamuse.com",
 
-	/** https://dictionaryapi.dev. Despite the name, it is **NOT** from google. */
-	GOOGLE_DICTIONARY_API: "https://api.dictionaryapi.dev",
-
 	/** https://freedictionaryapi.com */
 	FREE_DICTIONARY: "https://freedictionaryapi.com",
+
+	/** https://dictionaryapi.dev. Despite the name, it is **NOT** from google. */
+	GOOGLE_DICTIONARY_API: "https://api.dictionaryapi.dev",
 
 	/** https://www.urbandictionary.com */
 	URBAN_DICTIONARY: "https://unofficialurbandictionaryapi.com",

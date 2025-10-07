@@ -1,26 +1,4 @@
 {
-	"name": "offline-dicitionary-pwa",
-	"type": "module",
-	"scripts": {
-		"dev": "SSR=false vinxi dev",
-		"dev:ssr": "SSR=true vinxi dev",
-		"build": "SSR=false vinxi build && SSR=false vinxi build",
-		"build:ssr": "SSR=true vinxi build && SSR=true vinxi build",
-		"start": "vinxi start",
-		"dev:bun": "bun --bun dev",
-		"dev:ssr:bun": "bun --bun dev:ssr",
-		"build:bun": "bun --bun run build",
-		"build:ssr:bun": "bun --bun run build:ssr",
-		"start:bun": "bun --bun start",
-		"start:cloudflare": "npx wrangler --cwd dist pages dev",
-		"start:cloudflare:bun": "bunx wrangler --cwd dist pages dev",
-		"generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.png",
-		"format": "biome format .",
-		"lint": "biome check .",
-		"format:fix": "biome format . --write",
-		"lint:fix": "biome check . --write",
-		"test": "vitest"
-	},
 	"dependencies": {
 		"@solid-primitives/deep": "^0.3.3",
 		"@solidjs/meta": "^0.29.4",
@@ -50,10 +28,32 @@
 	"engines": {
 		"node": ">=22"
 	},
+	"name": "offline-dicitionary-pwa",
+	"scripts": {
+		"build": "SSR=false vinxi build && SSR=false vinxi build",
+		"build:bun": "bun --bun run build",
+		"build:ssr": "SSR=true vinxi build && SSR=true vinxi build",
+		"build:ssr:bun": "bun --bun run build:ssr",
+		"dev": "SSR=false vinxi dev",
+		"dev:bun": "bun --bun dev",
+		"dev:ssr": "SSR=true vinxi dev",
+		"dev:ssr:bun": "bun --bun dev:ssr",
+		"format": "biome format .",
+		"format:fix": "biome format . --write",
+		"generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.png",
+		"lint": "biome check .",
+		"lint:fix": "biome check . --write",
+		"start": "vinxi start",
+		"start:bun": "bun --bun start",
+		"start:cloudflare": "npx wrangler --cwd dist pages dev",
+		"start:cloudflare:bun": "bunx wrangler --cwd dist pages dev",
+		"test": "vitest"
+	},
 	"trustedDependencies": [
 		"@parcel/watcher",
 		"@tailwindcss/oxide",
 		"esbuild",
 		"sharp"
-	]
+	],
+	"type": "module"
 }

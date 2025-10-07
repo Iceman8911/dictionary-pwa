@@ -1,8 +1,6 @@
 import { A } from "@solidjs/router";
 
 const APP_INFO = {
-	name: "Offline Dictionary PWA",
-	version: "0.1.0",
 	description:
 		"A fast, offline-capable dictionary application built with SolidJS and SolidStart.",
 	features: [
@@ -15,6 +13,7 @@ const APP_INFO = {
 		"Word definitions, examples, and related terms",
 		"Configurable cache settings",
 	],
+	name: "Offline Dictionary PWA",
 	technologies: [
 		"SolidJS",
 		"TypeScript",
@@ -23,6 +22,7 @@ const APP_INFO = {
 		"Service Workers",
 		"Progressive Web App (PWA)",
 	],
+	version: "0.1.0",
 } as const;
 
 export default function AboutPage() {

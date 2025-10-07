@@ -73,8 +73,8 @@ async function fetchFromApi(
 	switch (api) {
 		case DATAMUSE: {
 			fetchedData = queryWordForDictionaryResultFromDatamuseApi({
-				word,
 				maxResults,
+				word,
 			});
 
 			break;
@@ -227,7 +227,7 @@ async function getSearchSuggestions(
 
 	if (gSettings.dictionaries.has(DATAMUSE))
 		suggestionArrayPromises.push(
-			getSearchSuggestionsFromDatamuseApi({ word: input, maxResults }),
+			getSearchSuggestionsFromDatamuseApi({ maxResults, word: input }),
 		);
 
 	if (gSettings.dictionaries.has(URBAN_DICTIONARY))

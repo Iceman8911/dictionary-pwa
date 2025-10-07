@@ -29,11 +29,10 @@ type SensesOutput = {
 
 /** One specific meaning of a word with examples and related information */
 const SensesSchema: v.GenericSchema<SensesOutput> = v.object({
+	/** Words that mean the opposite of this specific meaning */
+	antonyms: StringArraySchema,
 	/** What this meaning of the word means */
 	definition: v.string(),
-
-	/** Labels about how this meaning is used (formal, old-fashioned, technical, etc.) */
-	tags: StringArraySchema,
 
 	/** Example sentences showing how to use this meaning */
 	examples: StringArraySchema,
@@ -41,19 +40,21 @@ const SensesSchema: v.GenericSchema<SensesOutput> = v.object({
 	/** Real quotes from books or other sources using this word */
 	quotes: v.array(
 		v.object({
-			/** The actual quote text. */
-			text: v.string(),
-
 			/** Where this quote came from (book title, author, etc.). */
 			reference: v.string(),
+			/** The actual quote text. */
+			text: v.string(),
 		}),
 	),
+
+	/** More specific meanings within this meaning */
+	subsenses: v.array(v.lazy(() => SensesSchema)),
 
 	/** Words that mean the same as this specific meaning */
 	synonyms: StringArraySchema,
 
-	/** Words that mean the opposite of this specific meaning */
-	antonyms: StringArraySchema,
+	/** Labels about how this meaning is used (formal, old-fashioned, technical, etc.) */
+	tags: StringArraySchema,
 
 	/** How to say this meaning in other languages. */
 	translations: v.optional(
@@ -67,18 +68,24 @@ const SensesSchema: v.GenericSchema<SensesOutput> = v.object({
 			}),
 		),
 	),
-
-	/** More specific meanings within this meaning */
-	subsenses: v.array(v.lazy(() => SensesSchema)),
 });
 
 const ResponseSchema = v.object({
-	/** The word being looked up */
-	word: v.string(),
-
 	/** All dictionary entries for this word in different languages and contexts */
 	entries: v.array(
 		v.object({
+			/** Words that mean the opposite of this word (for the whole entry) */
+			antonyms: StringArraySchema,
+
+			/** Different forms of this word (like plural, past tense) */
+			forms: v.array(
+				v.object({
+					/** Labels describing what kind of form this is (plural, past tense, etc.) */
+					tags: StringArraySchema,
+					/** The different form of this word, e.g runs, running, ran, */
+					word: v.string(),
+				}),
+			),
 			/** Information about a language */
 			language: LanguageSchema,
 
@@ -92,38 +99,25 @@ const ResponseSchema = v.object({
 			pronunciations: v.array(
 				v.variant("type", [
 					v.object({
-						/** The type of pronunciation (like "ipa", "enpr", etc.) */
-						type: v.literal("ipa"),
+						/** Labels describing this pronunciation (like dialect or formality level) e.g "General American", "UK", "Ireland", "Northern England" */
+						tags: StringArraySchema,
 
 						/** The pronunciation written in the specified notation */
 						text: IpaPhonetic,
-
-						/** Labels describing this pronunciation (like dialect or formality level) e.g "General American", "UK", "Ireland", "Northern England" */
-						tags: StringArraySchema,
+						/** The type of pronunciation (like "ipa", "enpr", etc.) */
+						type: v.literal("ipa"),
 					}),
 
 					v.object({
-						/** The type of pronunciation (like "ipa", "enpr", etc.) */
-						type: v.literal("enpr"),
+						/** Labels describing this pronunciation (like dialect or formality level) e.g "General American", "UK", "Ireland", "Northern England" */
+						tags: StringArraySchema,
 
 						/** The pronunciation written in the specified notation */
 						text: v.string(),
-
-						/** Labels describing this pronunciation (like dialect or formality level) e.g "General American", "UK", "Ireland", "Northern England" */
-						tags: StringArraySchema,
+						/** The type of pronunciation (like "ipa", "enpr", etc.) */
+						type: v.literal("enpr"),
 					}),
 				]),
-			),
-
-			/** Different forms of this word (like plural, past tense) */
-			forms: v.array(
-				v.object({
-					/** The different form of this word, e.g runs, running, ran, */
-					word: v.string(),
-
-					/** Labels describing what kind of form this is (plural, past tense, etc.) */
-					tags: StringArraySchema,
-				}),
 			),
 
 			/** All the different meanings of this word */
@@ -131,17 +125,11 @@ const ResponseSchema = v.object({
 
 			/** Words that mean the same thing as this word (for the whole entry) */
 			synonyms: StringArraySchema,
-
-			/** Words that mean the opposite of this word (for the whole entry) */
-			antonyms: StringArraySchema,
 		}),
 	),
 
 	/** Information about where the dictionary data comes from */
 	source: v.object({
-		/** Link to the original Wiktionary page. */
-		url: UrlString,
-
 		/** Legal terms for using the dictionary data */
 		license: v.object({
 			/** Name of the license */
@@ -150,7 +138,11 @@ const ResponseSchema = v.object({
 			/** Link to read the full license terms */
 			url: UrlString,
 		}),
+		/** Link to the original Wiktionary page. */
+		url: UrlString,
 	}),
+	/** The word being looked up */
+	word: v.string(),
 });
 
 type ResponseOutput = v.InferOutput<typeof ResponseSchema>;

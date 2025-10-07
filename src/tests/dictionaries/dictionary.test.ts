@@ -37,12 +37,12 @@ describe("fetchDictionaryResult", () => {
 		get.mockResolvedValue({
 			cachedOn,
 			data: {
-				name: "CachedWord",
-				originApi: DICTIONARY_API.FREE_DICTIONARY,
+				audioUrls: [],
 				definitions: [],
 				examples: [],
 				frequency: null,
-				audioUrls: [],
+				name: "CachedWord",
+				originApi: DICTIONARY_API.FREE_DICTIONARY,
 				partsOfSpeech: [],
 				phonetics: [],
 				related: { antonyms: [], synonyms: [] },
@@ -55,8 +55,8 @@ describe("fetchDictionaryResult", () => {
 		// E.g., gSettings.cacheDuration = 60 * 60 * 1000 * 2; // 2 hours
 
 		const result = await fetchDictionaryResult({
-			word: "CachedWord",
 			dictionary: DICTIONARY_API.FREE_DICTIONARY,
+			word: "CachedWord",
 		});
 
 		expect(result).not.toBeNull();
